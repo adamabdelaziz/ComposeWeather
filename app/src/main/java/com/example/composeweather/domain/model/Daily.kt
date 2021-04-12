@@ -1,4 +1,4 @@
-package com.example.composeweather.domain
+package com.example.composeweather.domain.model
 
 data class Daily(
     val clouds: Int,
