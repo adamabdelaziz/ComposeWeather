@@ -4,6 +4,7 @@ plugins {
     id 'kotlin-kapt'
     id 'kotlin-parcelize'
     id 'dagger.hilt.android.plugin'
+
 }
 
 android {
@@ -94,6 +95,9 @@ dependencies {
 
     //Timber
     implementation 'com.jakewharton.timber:timber:4.7.1'
+
+    //Gson
+    implementation 'com.google.code.gson:gson:2.8.6'
 }
 
 kapt {

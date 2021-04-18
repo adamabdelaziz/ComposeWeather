@@ -19,5 +19,5 @@ data class OneCall(
     val timezone_offset: Int
 ){
     @PrimaryKey(autoGenerate = true)
-    val id: Long? = null
+    var id: Long? = null
 }
