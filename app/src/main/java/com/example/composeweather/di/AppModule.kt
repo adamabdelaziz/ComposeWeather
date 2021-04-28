@@ -1,7 +1,7 @@
 package com.example.composeweather.di
 
 import android.content.Context
-import com.example.composeweather.domain.AppDatabase
+import com.example.composeweather.domain.db.AppDatabase
 import com.example.composeweather.domain.dao.WeatherDao
 import com.example.composeweather.network.WeatherRemoteDataSource
 import com.example.composeweather.network.WeatherService

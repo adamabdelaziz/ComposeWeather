@@ -7,7 +7,7 @@ import com.example.composeweather.domain.model.Daily
 import com.example.composeweather.domain.model.Hourly
 import com.example.composeweather.domain.model.Minutely
 
-@Entity(tableName = "oneCall")
+@Entity(tableName = "OneCall")
 data class OneCall(
     val current: Current,
     val daily: List<Daily>,
