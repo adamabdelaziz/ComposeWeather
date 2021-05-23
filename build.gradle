@@ -13,7 +13,7 @@ buildscript {
 
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.0.0-alpha15'
+        classpath 'com.android.tools.build:gradle:7.0.0-beta02'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.4.32"
 
         def hilt = "2.34-beta"

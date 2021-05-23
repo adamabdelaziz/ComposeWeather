@@ -1,7 +1,7 @@
 package com.example.composeweather.domain.model
 
 data class Main(
-    val feels_like: Double,
+    val feels_like: FeelsLike,
     val humidity: Int,
     val pressure: Int,
     val temp: Double,

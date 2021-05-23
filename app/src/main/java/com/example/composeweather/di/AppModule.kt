@@ -3,7 +3,6 @@ package com.example.composeweather.di
 import android.content.Context
 import com.example.composeweather.domain.db.AppDatabase
 import com.example.composeweather.domain.dao.WeatherDao
-import com.example.composeweather.network.WeatherRemoteDataSource
 import com.example.composeweather.network.WeatherService
 import com.example.composeweather.repository.WeatherRepository
 import com.example.composeweather.util.BASE_URL
@@ -36,11 +35,11 @@ object AppModule {
     fun provideWeatherService(retrofit: Retrofit): WeatherService =
         retrofit.create(WeatherService::class.java)
 
-    @Singleton
-    @Provides
-    fun provideWeatherRemoteDataSource(weatherService: WeatherService) = WeatherRemoteDataSource(
-        weatherService
-    )
+//    @Singleton
+//    @Provides
+//    fun provideWeatherRemoteDataSource(weatherService: WeatherService) = WeatherRemoteDataSource(
+//        weatherService
+//    )
 
     @Singleton
     @Provides
@@ -54,7 +53,7 @@ object AppModule {
 
     @Singleton
     @Provides
-    fun provideRepository(remoteDataSource: WeatherRemoteDataSource, localDataSource: WeatherDao) =
+    fun provideRepository(remoteDataSource: WeatherService, localDataSource: WeatherDao) =
         WeatherRepository(remoteDataSource, localDataSource)
 
 

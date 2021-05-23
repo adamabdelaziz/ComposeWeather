@@ -1,13 +1,17 @@
 package com.example.composeweather.util
 
 import androidx.room.TypeConverter
-import com.example.composeweather.domain.model.Current
-import com.example.composeweather.domain.model.Daily
-import com.example.composeweather.domain.model.Hourly
-import com.example.composeweather.domain.model.Minutely
+import com.example.composeweather.domain.model.*
 import com.google.gson.Gson
 
 class Converters {
+
+    //FeelsLike
+    @TypeConverter
+    fun feelsLikeToString(feelsLike: FeelsLike): String = Gson().toJson(feelsLike)
+
+    @TypeConverter
+    fun stringToFeelsLike(string: String?): FeelsLike? = Gson().fromJson(string, FeelsLike::class.java)
 
     //Current
     @TypeConverter

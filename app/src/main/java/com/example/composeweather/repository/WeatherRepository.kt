@@ -1,19 +1,32 @@
 package com.example.composeweather.repository
 
 import com.example.composeweather.domain.dao.WeatherDao
-import com.example.composeweather.network.WeatherRemoteDataSource
-import com.example.composeweather.util.performGetOperation
+import com.example.composeweather.domain.model.OneCall
+import com.example.composeweather.network.WeatherService
+import com.example.composeweather.util.API_KEY
+import com.example.composeweather.util.FAHRENHEIT
+import timber.log.Timber
 import javax.inject.Inject
 
 class WeatherRepository @Inject constructor(
-    private val remoteDataSource: WeatherRemoteDataSource,
+    private val remoteDataSource: WeatherService,
     private val localDataSource: WeatherDao
 ) {
 
-    //Probably will have to change the function parameters in the Dao
-    fun getCurrentOneCall(lat: Long, lon:Long) = performGetOperation(
-        databaseQuery = {localDataSource.getCurrentOneCall()},
-        networkCall = {remoteDataSource.getOneCallLatLon(lat,lon)},
-        saveCallResult = {localDataSource.insertOneCall(it)}
-    )
+    suspend fun getOneCall(lat: String, lon: String): OneCall {
+        val oneCall = remoteDataSource.getOneCallLatLon(lat, lon, API_KEY, FAHRENHEIT)
+
+        if (oneCall != null) {
+            Timber.d("ONECALL NOT NULL")
+
+            Timber.d(oneCall.timezone + "timeZone")
+            Timber.d("${oneCall.current}" + " Current")
+
+            localDataSource.insertOneCall(oneCall)
+            return oneCall
+        } else {
+            Timber.d("ONECALL IS NULL, GETTING FROM ROOOM")
+            return localDataSource.getCurrentOneCall()
+        }
+    }
 }
