@@ -9,3 +9,5 @@ const val FAHRENHEIT = "IMPERIAL"
 const val NYC_LAT   = 40.7131.toString()
 
 const val NYC_LON  = (-74.0072).toString()
+
+const val DEGREE_SYMBOL =  "\u00B0"
