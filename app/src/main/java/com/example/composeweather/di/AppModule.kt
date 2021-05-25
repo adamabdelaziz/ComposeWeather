@@ -1,11 +1,13 @@
 package com.example.composeweather.di
 
+import android.app.Activity
 import android.content.Context
 import com.example.composeweather.domain.db.AppDatabase
 import com.example.composeweather.domain.dao.WeatherDao
 import com.example.composeweather.network.WeatherService
 import com.example.composeweather.repository.WeatherRepository
 import com.example.composeweather.util.BASE_URL
+import com.google.android.gms.location.LocationServices
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import dagger.Module
@@ -55,6 +57,9 @@ object AppModule {
     @Provides
     fun provideRepository(remoteDataSource: WeatherService, localDataSource: WeatherDao) =
         WeatherRepository(remoteDataSource, localDataSource)
+
+
+
 
 
 }

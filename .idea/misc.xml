@@ -4,6 +4,8 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="..\:/AndroidStudioProjects/ComposeWeather/app/src/main/res/drawable/bottom_nav_colors.xml" value="0.21296296296296297" />
+        <entry key="..\:/AndroidStudioProjects/ComposeWeather/app/src/main/res/drawable/ic_launcher_background.xml" value="0.16018518518518518" />
+        <entry key="..\:/AndroidStudioProjects/ComposeWeather/app/src/main/res/drawable/nani.xml" value="0.16018518518518518" />
         <entry key="..\:/AndroidStudioProjects/ComposeWeather/app/src/main/res/layout/activity_main.xml" value="0.5364583333333334" />
         <entry key="..\:/AndroidStudioProjects/ComposeWeather/app/src/main/res/menu/bottom_nav_menu.xml" value="0.5364583333333334" />
       </map>

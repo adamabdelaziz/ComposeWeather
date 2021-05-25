@@ -2,7 +2,6 @@ package com.example.composeweather.network
 
 import com.example.composeweather.domain.model.OneCall
 import com.example.composeweather.util.API_KEY
-import com.example.composeweather.util.Resource
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Path
