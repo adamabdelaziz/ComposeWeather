@@ -2,22 +2,28 @@ package com.example.composeweather.ui.weather
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.location.Geocoder
 import android.location.Location
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -35,12 +41,41 @@ import com.google.android.gms.location.LocationServices
 import dagger.hilt.android.AndroidEntryPoint
 import timber.log.Timber
 import kotlin.math.roundToInt
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 @AndroidEntryPoint
 class WeatherFragment : Fragment() {
 
     private val viewModel: WeatherViewModel by viewModels()
     private lateinit var fusedLocationClient: FusedLocationProviderClient
+    private lateinit var requestPermissionLauncher: ActivityResultLauncher<String>
+    private lateinit var geocoder: Geocoder
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+
+        geocoder = Geocoder(context)
+
+        requestPermissionLauncher =
+            registerForActivityResult(
+                ActivityResultContracts.RequestPermission()
+            ) { isGranted: Boolean ->
+                if (isGranted) {
+                    Timber.d("Permission granted")
+                    //Wondering if this will call it twice in a row but if the permission gets granted for the first time this should allow it to continue to update the weather
+                    //instead of making the user click the button twice
+                    refreshLocation()
+                } else {
+                    Timber.d("Permission denied")
+                    Toast.makeText(
+                        context,
+                        "The app will not work without location services",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+            }
+
+        super.onCreate(savedInstanceState)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -49,26 +84,37 @@ class WeatherFragment : Fragment() {
     ): View {
         return ComposeView(requireContext()).apply {
 
-//            fusedLocationClient = LocationServices.getFusedLocationProviderClient(Activity())
-//            fusedLocationClient.lastLocation.addOnSuccessListener { location : Location?->
-//
-//            }
 
-
-            //Use default Lat and Lon so some value is displayed
+            //Trying to get rid of this fake data but not quite there yet
             viewModel.getWeather(NYC_LAT, NYC_LON)
+            Timber.d("getWeather Called in VM from Fragment with that boofy data")
+
             val oneCallLiveData = viewModel.oneCall
-            Timber.d("getWeather Called in VM from Fragment")
+
+            if (ActivityCompat.checkSelfPermission(
+                    requireContext(),
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED
+            ) {
+                Timber.d("Permission already granted from before onCreateView() is called")
+                refreshLocation()
+            } else {
+                requestPermissionLauncher.launch(Manifest.permission.ACCESS_COARSE_LOCATION)
+            }
+
 
             setContent {
+                Timber.d("setContent called")
                 val weatherState by oneCallLiveData.observeAsState(initial = oneCallLiveData.value)
 
                 if (weatherState != null) {
                     ComposeWeatherTheme {
+                        Timber.d("weatherState!=null; calling MainWeatherComponent()")
                         MainWeatherComponent(weatherState!!)
                     }
                 } else {
                     ComposeWeatherTheme {
+                        Timber.d("weatherState==null; calling LiveDataLoadingComponent()")
                         LiveDataLoadingComponent()
                     }
                 }
@@ -76,15 +122,37 @@ class WeatherFragment : Fragment() {
         }
     }
 
-
+    @Composable
+    fun SetStatusBar(){
+        val systemUiController = rememberSystemUiController()
+        val useDarkIcons = MaterialTheme.colors.isLight
+        val color = MaterialTheme.colors.primary
+        SideEffect {
+            // Update all of the system bar colors to be transparent, and use
+            // dark icons if we're in light theme
+            systemUiController.setSystemBarsColor(
+                color = color,
+                darkIcons = useDarkIcons
+            )
+        }
+    }
     @Composable
     fun MainWeatherComponent(weatherState: OneCall) {
+
+        val addressList = geocoder.getFromLocation(weatherState.lat, weatherState.lon, 5)
+
+        val title: String = if (addressList.elementAt(2).featureName != null) {
+            addressList.elementAt(2).featureName
+        } else {
+            "New York City"
+        }
+        SetStatusBar()
         Column(
             modifier = Modifier.fillMaxSize(),
             //verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            TopRow("New York City")
+            TopRow(title)
             CurrentCard(weatherState)
 
 
@@ -95,8 +163,9 @@ class WeatherFragment : Fragment() {
     fun TopRow(cityName: String) {
         TopAppBar(
             title = { Text(cityName) },
+            backgroundColor = MaterialTheme.colors.primary,
             actions = {
-                IconButton(onClick = { refreshLocation()}) {
+                IconButton(onClick = { refreshLocation() }) {
                     Icon(Icons.Filled.LocationOn, contentDescription = "Refresh Current Location")
                 }
                 IconButton(onClick = { goToSettings() }) {
@@ -104,7 +173,7 @@ class WeatherFragment : Fragment() {
                 }
             },
 
-        )
+            )
 
 //        Card(
 //            modifier = Modifier.fillMaxWidth().padding(16.dp),
@@ -220,15 +289,7 @@ class WeatherFragment : Fragment() {
     }
 
 
-    @Preview
-    @Composable
-    fun PreviewScreen() {
 
-        viewModel.getWeather(NYC_LAT, NYC_LON)
-        val weatherState = viewModel.oneCall.observeAsState().value!!
-
-        MainWeatherComponent(weatherState)
-    }
 
     private fun refreshLocation() {
 
@@ -237,29 +298,36 @@ class WeatherFragment : Fragment() {
 
         if (ActivityCompat.checkSelfPermission(
                 this.requireContext(),
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                this.requireContext(),
                 Manifest.permission.ACCESS_COARSE_LOCATION
             ) != PackageManager.PERMISSION_GRANTED
         ) {
+            Timber.d("Do not have location, requesting permission.")
+            requestPermissionLauncher.launch(Manifest.permission.ACCESS_COARSE_LOCATION)
+        } else {
+            Timber.d("Have permission, refreshing location")
 
-            ActivityCompat.requestPermissions(this.requireActivity(),)
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return
-        }
-        fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
-            val lat = location!!.latitude
-            val lon = location!!.longitude
+            fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
+                val lat = location!!.latitude
+                val lon = location.longitude
 
-            viewModel.getWeather(lat.toString(), lon.toString())
+
+                val addressList = geocoder.getFromLocation(lat, lon, 10)
+                for (address in addressList) {
+                    Timber.d(addressList.indexOf(address).toString() + " index")
+                    Timber.d(address.adminArea + " adminArea")
+                    Timber.d(address.countryCode + " countryCode")
+                    Timber.d(address.countryName + " countryName")
+                    Timber.d(address.featureName + " featureName")
+                    Timber.d(address.locality + " locality")
+                    Timber.d(address.phone + " phone]")
+                    Timber.d(address.premises + " premises")
+
+                }
+                viewModel.getWeather(lat.toString(), lon.toString())
+            }
         }
+
+
     }
 
     private fun goToSettings() {
