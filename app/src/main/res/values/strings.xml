@@ -3,4 +3,9 @@
 
     <string name="menu_location"> Refresh Location</string>
     <string name="menu_settings">Go to Settings Menu</string>
+
+    <string name="rain_icon_description">Rain Icon</string>
+    <string name="snow_icon_description">Snow Icon</string>
+    <string name="cloud_icon_description">Cloud Icon</string>
+    <string name="humidity_icon_description">huimidty icon</string>
 </resources>

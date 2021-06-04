@@ -11,6 +11,8 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -23,25 +25,27 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import com.example.composeweather.R
 import com.example.composeweather.domain.model.OneCall
+import com.example.composeweather.domain.model.Rain
+import com.example.composeweather.domain.model.Snow
 import com.example.composeweather.ui.theme.ComposeWeatherTheme
-import com.example.composeweather.util.DEGREE_SYMBOL
-import com.example.composeweather.util.NYC_LAT
-import com.example.composeweather.util.NYC_LON
+import com.example.composeweather.util.*
+import com.google.accompanist.coil.rememberCoilPainter
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import dagger.hilt.android.AndroidEntryPoint
 import timber.log.Timber
 import kotlin.math.roundToInt
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 @AndroidEntryPoint
 class WeatherFragment : Fragment() {
@@ -123,7 +127,7 @@ class WeatherFragment : Fragment() {
     }
 
     @Composable
-    fun SetStatusBar(){
+    fun SetStatusBar() {
         val systemUiController = rememberSystemUiController()
         val useDarkIcons = MaterialTheme.colors.isLight
         val color = MaterialTheme.colors.primary
@@ -136,6 +140,7 @@ class WeatherFragment : Fragment() {
             )
         }
     }
+
     @Composable
     fun MainWeatherComponent(weatherState: OneCall) {
 
@@ -174,44 +179,6 @@ class WeatherFragment : Fragment() {
             },
 
             )
-
-//        Card(
-//            modifier = Modifier.fillMaxWidth().padding(16.dp),
-//            backgroundColor = MaterialTheme.colors.surface
-//        ) {
-//            Row(
-////                modifier = Modifier.fillMaxWidth()
-//            ) {
-//                Text(
-//                    text = cityName,
-//                    fontSize = 32.sp,
-//                    modifier = Modifier.padding(8.dp)
-//                    //modifier = Modifier.alignBy()  //Figure out how to make it left align
-//                )
-//                IconButton(
-//                    modifier = Modifier.size(64.dp).padding(8.dp),
-//                    onClick = { refreshLocation() }
-//                ) {
-//                    Icon(
-//                        Icons.Default.LocationOn,
-//                        "getLocation",
-//                        tint = MaterialTheme.colors.secondary
-//                    )
-//
-//                }
-//                IconButton(
-//                    modifier = Modifier.size(18.dp).padding(8.dp),
-//                    onClick = { goToSettings() }
-//                ) {
-//                    Icon(
-//                        Icons.Default.Settings,
-//                        "goToSettings",
-//                        tint = MaterialTheme.colors.secondary
-//                    )
-//
-//                }
-//            }
-//        }
     }
 
 
@@ -241,12 +208,20 @@ class WeatherFragment : Fragment() {
         val clouds = current.clouds
         val windSpeed = current.wind_speed
 
+        val rainObject = current.rain ?: Rain(0.0, 0.0)
+        val snowObject = current.snow ?: Snow(0.0, 0.0)
+
+        val rain = rainObject.oneHour
+        val snow = snowObject.oneHour
+
+        Timber.d("$rain + currentCardRain")
         val timezone = weatherState.timezone
 
         Card(
             modifier = Modifier.fillMaxWidth().padding(16.dp),
         ) {
             Column(
+                //Column modifiers go here
 
             ) {
                 Text(
@@ -262,7 +237,71 @@ class WeatherFragment : Fragment() {
                         fontSize = 24.sp
                     )
                 }
+                Row(
+                    //Row Modifiers go here
+                    modifier = Modifier.align(CenterHorizontally),
+                    horizontalArrangement = Arrangement.Start,
+                    verticalAlignment = Alignment.CenterVertically
 
+                ) {
+                    if (rain > 0.0) {
+                    Image(
+                        painter = rememberCoilPainter(RAIN_ICON_NIGHT),
+                        contentDescription = stringResource(R.string.rain_icon_description)
+                    )
+                    Text(
+                        text = "${toInches(rain)} in.",
+                        modifier = Modifier.padding(4.dp),
+                        fontSize = 16.sp
+                    )
+                    }
+                    if (snow > 0.0) {
+                    Image(
+                        painter = rememberCoilPainter(SNOW_ICON_NIGHT),
+                        contentDescription = stringResource(R.string.snow_icon_description),
+                    )
+                    Text(
+                        text = "${toInches(snow)} in.",
+                        modifier = Modifier.padding(4.dp),
+                        fontSize = 16.sp
+                    )
+                     }
+                    when (clouds.toInt()) {
+                        in 0..25 -> {
+                            Image(
+                                painter = rememberCoilPainter(FEW_CLOUDS_NIGHT),
+                                contentDescription = stringResource(R.string.cloud_icon_description)
+                            )
+                        }
+                        in 25..50 -> {
+                            Image(
+                                painter = rememberCoilPainter(SCATTERED_CLOUDS_NIGHT),
+                                contentDescription = stringResource(R.string.cloud_icon_description)
+                            )
+                        }
+                        in 50..100 -> {
+                            Image(
+                                painter = rememberCoilPainter(OVERCAST_CLOUDS_NIGHT),
+                                contentDescription = stringResource(R.string.cloud_icon_description)
+                            )
+                        }
+                    }
+                    Text(
+                        text = "$clouds%",
+                        modifier = Modifier.padding(8.dp),
+                        fontSize = 16.sp
+                    )
+                    Image(
+                        painter = painterResource(R.drawable.humidity200xx),
+                        contentDescription = stringResource(R.string.humidity_icon_description),
+
+                        )
+                    Text(
+                        text = "$humidity%",
+                        modifier = Modifier.padding(4.dp),
+                        fontSize = 16.sp
+                    )
+                }
             }
         }
 
@@ -289,8 +328,6 @@ class WeatherFragment : Fragment() {
     }
 
 
-
-
     private fun refreshLocation() {
 
         fusedLocationClient =
@@ -307,8 +344,16 @@ class WeatherFragment : Fragment() {
             Timber.d("Have permission, refreshing location")
 
             fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
-                val lat = location!!.latitude
-                val lon = location.longitude
+                val lat: Double
+                val lon: Double
+
+                if (location == null) {
+                    lat = NYC_LAT.toDouble()
+                    lon = NYC_LON.toDouble()
+                } else {
+                    lat = location.latitude
+                    lon = location.longitude
+                }
 
 
                 val addressList = geocoder.getFromLocation(lat, lon, 10)

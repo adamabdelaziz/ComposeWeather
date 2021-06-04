@@ -112,10 +112,15 @@ dependencies {
     //Google Play
     implementation 'com.google.android.gms:play-services-location:18.0.0'
 
+    //Coil
+    implementation "io.coil-kt:coil:1.2.1"
+
     //Accompanist
-    def accompanist_version = "0.10.0"
+    def accompanist_version = "0.11.1"
     implementation "com.google.accompanist:accompanist-appcompat-theme:$accompanist_version"
-    implementation "com.google.accompanist:accompanist-systemuicontroller:$accompanist_version"
+    implementation "com.google.accompanist:accompanist-systemuicontroller:$accompanist_version"\
+    //Coil for Accompanist
+    implementation "com.google.accompanist:accompanist-coil:$accompanist_version"
 }
 
 kapt {

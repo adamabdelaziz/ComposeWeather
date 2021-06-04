@@ -5,6 +5,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.composeweather.domain.db.AppDatabase
 import com.example.composeweather.domain.model.OneCall
 import com.example.composeweather.repository.WeatherRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
