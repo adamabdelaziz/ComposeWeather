@@ -2,6 +2,7 @@ package com.example.composeweather.ui.weather
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.location.Address
 import android.location.Geocoder
 import android.location.Location
 import android.os.Bundle
@@ -12,7 +13,7 @@ import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -144,13 +145,16 @@ class WeatherFragment : Fragment() {
     @Composable
     fun MainWeatherComponent(weatherState: OneCall) {
 
-        val addressList = geocoder.getFromLocation(weatherState.lat, weatherState.lon, 5)
 
-        val title: String = if (addressList.elementAt(2).featureName != null) {
-            addressList.elementAt(2).featureName
-        } else {
-            "New York City"
-        }
+        val addressList = geocoder.getFromLocation(weatherState.lat, weatherState.lon, 5)
+        val title = getTitle(addressList)
+
+//        val title: String = if (addressList.elementAt(2).featureName != null) {
+//            addressList.elementAt(2).featureName
+//        } else {
+//            "New York City"
+//        }
+
         SetStatusBar()
         Column(
             modifier = Modifier.fillMaxSize(),
@@ -162,6 +166,21 @@ class WeatherFragment : Fragment() {
 
 
         }
+    }
+
+    private fun getTitle(addressList: List<Address>): String {
+        var x = 0
+        var numeric = true
+        var title : String = "New York City"
+
+        while(numeric){
+            title = addressList[x].featureName
+            x++
+            numeric = title.matches(".*\\d.*".toRegex())
+            Timber.d(numeric.toString() + "" + title)
+        }
+
+        return title
     }
 
     @Composable
@@ -245,44 +264,80 @@ class WeatherFragment : Fragment() {
 
                 ) {
                     if (rain > 0.0) {
-                    Image(
-                        painter = rememberCoilPainter(RAIN_ICON_NIGHT),
-                        contentDescription = stringResource(R.string.rain_icon_description)
-                    )
-                    Text(
-                        text = "${toInches(rain)} in.",
-                        modifier = Modifier.padding(4.dp),
-                        fontSize = 16.sp
-                    )
+                        Image(
+                            painter = rememberCoilPainter(RAIN_ICON_NIGHT),
+                            contentDescription = stringResource(R.string.rain_icon_description),
+                            modifier = Modifier.clickable(onClick = {
+                                Toast.makeText(
+                                    context,
+                                    R.string.rain_icon_description,
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            })
+                        )
+                        Text(
+                            text = "${toInches(rain)} in.",
+                            modifier = Modifier.padding(4.dp),
+                            fontSize = 16.sp
+                        )
                     }
                     if (snow > 0.0) {
-                    Image(
-                        painter = rememberCoilPainter(SNOW_ICON_NIGHT),
-                        contentDescription = stringResource(R.string.snow_icon_description),
-                    )
-                    Text(
-                        text = "${toInches(snow)} in.",
-                        modifier = Modifier.padding(4.dp),
-                        fontSize = 16.sp
-                    )
-                     }
+                        Image(
+                            painter = rememberCoilPainter(SNOW_ICON_NIGHT),
+                            contentDescription = stringResource(R.string.snow_icon_description),
+                            modifier = Modifier.clickable(onClick = {
+                                Toast.makeText(
+                                    context,
+                                    R.string.snow_icon_description,
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            })
+                        )
+                        Text(
+                            text = "${toInches(snow)} in.",
+                            modifier = Modifier.padding(4.dp),
+                            fontSize = 16.sp
+                        )
+                    }
                     when (clouds.toInt()) {
                         in 0..25 -> {
                             Image(
                                 painter = rememberCoilPainter(FEW_CLOUDS_NIGHT),
-                                contentDescription = stringResource(R.string.cloud_icon_description)
+                                contentDescription = stringResource(R.string.cloud_icon_description),
+                                modifier = Modifier.clickable(onClick = {
+                                    Toast.makeText(
+                                        context,
+                                        R.string.cloud_icon_description,
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                })
                             )
                         }
                         in 25..50 -> {
                             Image(
                                 painter = rememberCoilPainter(SCATTERED_CLOUDS_NIGHT),
-                                contentDescription = stringResource(R.string.cloud_icon_description)
+                                contentDescription = stringResource(R.string.cloud_icon_description),
+                                modifier = Modifier.clickable(onClick = {
+                                    Toast.makeText(
+                                        context,
+                                        R.string.cloud_icon_description,
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                })
                             )
                         }
                         in 50..100 -> {
                             Image(
                                 painter = rememberCoilPainter(OVERCAST_CLOUDS_NIGHT),
-                                contentDescription = stringResource(R.string.cloud_icon_description)
+                                contentDescription = stringResource(R.string.cloud_icon_description),
+                                modifier = Modifier.clickable(onClick = {
+                                    Toast.makeText(
+                                        context,
+                                        R.string.cloud_icon_description,
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                })
+
                             )
                         }
                     }
@@ -294,8 +349,14 @@ class WeatherFragment : Fragment() {
                     Image(
                         painter = painterResource(R.drawable.humidity200xx),
                         contentDescription = stringResource(R.string.humidity_icon_description),
-
-                        )
+                        modifier = Modifier.clickable(onClick = {
+                            Toast.makeText(
+                                context,
+                                R.string.humidity_icon_description,
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        })
+                    )
                     Text(
                         text = "$humidity%",
                         modifier = Modifier.padding(4.dp),
