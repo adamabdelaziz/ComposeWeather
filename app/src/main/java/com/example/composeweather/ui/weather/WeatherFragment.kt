@@ -15,6 +15,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocationOn
@@ -47,6 +48,8 @@ import com.google.android.gms.location.LocationServices
 import dagger.hilt.android.AndroidEntryPoint
 import timber.log.Timber
 import kotlin.math.roundToInt
+import androidx.compose.foundation.lazy.items
+import com.example.composeweather.domain.model.Daily
 
 @AndroidEntryPoint
 class WeatherFragment : Fragment() {
@@ -213,6 +216,16 @@ class WeatherFragment : Fragment() {
 
     @Composable
     fun DailyCard(weatherState: OneCall) {
+        val daily = weatherState.daily
+        LazyColumn {
+            items(daily){day->
+                DailyRow(day)
+            }
+        }
+    }
+
+    @Composable
+    private fun DailyRow(day: Daily) {
 
     }
 
@@ -418,17 +431,19 @@ class WeatherFragment : Fragment() {
 
 
                 val addressList = geocoder.getFromLocation(lat, lon, 10)
-                for (address in addressList) {
-                    Timber.d(addressList.indexOf(address).toString() + " index")
-                    Timber.d(address.adminArea + " adminArea")
-                    Timber.d(address.countryCode + " countryCode")
-                    Timber.d(address.countryName + " countryName")
-                    Timber.d(address.featureName + " featureName")
-                    Timber.d(address.locality + " locality")
-                    Timber.d(address.phone + " phone]")
-                    Timber.d(address.premises + " premises")
 
-                }
+//                for (address in addressList) {
+//                    Timber.d(addressList.indexOf(address).toString() + " index")
+//                    Timber.d(address.adminArea + " adminArea")
+//                    Timber.d(address.countryCode + " countryCode")
+//                    Timber.d(address.countryName + " countryName")
+//                    Timber.d(address.featureName + " featureName")
+//                    Timber.d(address.locality + " locality")
+//                    Timber.d(address.phone + " phone]")
+//                    Timber.d(address.premises + " premises")
+//
+//                }
+
                 viewModel.getWeather(lat.toString(), lon.toString())
             }
         }
