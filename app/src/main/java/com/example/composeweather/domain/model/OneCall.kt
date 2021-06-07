@@ -6,6 +6,7 @@ import com.example.composeweather.domain.model.Current
 import com.example.composeweather.domain.model.Daily
 import com.example.composeweather.domain.model.Hourly
 import com.example.composeweather.domain.model.Minutely
+import com.google.gson.annotations.SerializedName
 
 @Entity(tableName = "OneCall")
 data class OneCall(
@@ -16,7 +17,8 @@ data class OneCall(
     val lon: Double,
     val minutely: List<Minutely>,
     val timezone: String,
-    val timezone_offset: Int
+    @SerializedName("timezone_offset")
+    val offset: Int
 ){
     @PrimaryKey(autoGenerate = true)
     var id: Long? = null

@@ -16,13 +16,12 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.SideEffect
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
@@ -36,6 +35,7 @@ import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.example.composeweather.R
+import com.example.composeweather.domain.model.Daily
 import com.example.composeweather.domain.model.OneCall
 import com.example.composeweather.domain.model.Rain
 import com.example.composeweather.domain.model.Snow
@@ -48,8 +48,6 @@ import com.google.android.gms.location.LocationServices
 import dagger.hilt.android.AndroidEntryPoint
 import timber.log.Timber
 import kotlin.math.roundToInt
-import androidx.compose.foundation.lazy.items
-import com.example.composeweather.domain.model.Daily
 
 @AndroidEntryPoint
 class WeatherFragment : Fragment() {
@@ -166,6 +164,7 @@ class WeatherFragment : Fragment() {
         ) {
             TopRow(title)
             CurrentCard(weatherState)
+            DailyCard(weatherState)
 
 
         }
@@ -174,9 +173,9 @@ class WeatherFragment : Fragment() {
     private fun getTitle(addressList: List<Address>): String {
         var x = 0
         var numeric = true
-        var title : String = "New York City"
+        var title: String = "New York City"
 
-        while(numeric){
+        while (numeric) {
             title = addressList[x].featureName
             x++
             numeric = title.matches(".*\\d.*".toRegex())
@@ -217,17 +216,54 @@ class WeatherFragment : Fragment() {
     @Composable
     fun DailyCard(weatherState: OneCall) {
         val daily = weatherState.daily
+        val offSet = weatherState.offset
+
         LazyColumn {
-            items(daily){day->
-                DailyRow(day)
+            items(daily) { day ->
+                DailyRow(day, offSet)
             }
         }
     }
 
     @Composable
-    private fun DailyRow(day: Daily) {
+    private fun DailyRow(day: Daily, offset: Int) {
+        var expanded by remember { mutableStateOf(false) }
+        val high = day.temp.max.toString()
+        val low = day.temp.min.toString()
+        Card(modifier = Modifier.fillMaxWidth().padding(16.dp, 4.dp)) {
+            Column() {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(8.dp),
+                    horizontalArrangement = Arrangement.Start,
+                    verticalAlignment = Alignment.CenterVertically,
+
+                    ) {
+                    Text(
+                        text = getDayFromUnix(day.dt, offset),
+                        modifier = Modifier
+                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(8.dp),
+                        horizontalArrangement = Arrangement.End,
+                        verticalAlignment = Alignment.CenterVertically,
+                    )
+                    {
+                        Text(
+                            text = "$high$DEGREE_SYMBOL",
+                            modifier = Modifier.padding(8.dp,4.dp)
+                        )
+                        Text(
+                            text = "$low$DEGREE_SYMBOL",
+                            modifier = Modifier.padding(8.dp,4.dp)
+                        )
+                    }
+
+                }
+            }
+        }
 
     }
+
 
     @Composable
     fun CurrentCard(weatherState: OneCall) {
@@ -432,17 +468,17 @@ class WeatherFragment : Fragment() {
 
                 val addressList = geocoder.getFromLocation(lat, lon, 10)
 
-//                for (address in addressList) {
-//                    Timber.d(addressList.indexOf(address).toString() + " index")
+                for (address in addressList) {
+                    Timber.d(addressList.indexOf(address).toString() + " index")
 //                    Timber.d(address.adminArea + " adminArea")
 //                    Timber.d(address.countryCode + " countryCode")
 //                    Timber.d(address.countryName + " countryName")
-//                    Timber.d(address.featureName + " featureName")
+                    Timber.d(address.featureName + " featureName")
 //                    Timber.d(address.locality + " locality")
 //                    Timber.d(address.phone + " phone]")
 //                    Timber.d(address.premises + " premises")
-//
-//                }
+
+                }
 
                 viewModel.getWeather(lat.toString(), lon.toString())
             }
