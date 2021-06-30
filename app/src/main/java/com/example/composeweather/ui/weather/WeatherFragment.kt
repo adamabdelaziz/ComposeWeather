@@ -14,7 +14,6 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -243,12 +242,17 @@ class WeatherFragment : Fragment() {
         val high = day.temp.max.roundToInt().toString()
         val low = day.temp.min.roundToInt().toString()
 
-        val weather = day.weather[0]
+        val mornTemp = day.temp.morn.roundToInt().toString()
+        val dayTemp = day.temp.day.roundToInt().toString()
+        val eveTemp = day.temp.eve.roundToInt().toString()
+        val nightTemp = day.temp.night.roundToInt().toString()
 
+        val weather = day.weather[0]
         val icon = getIconLarge(weather.icon)
         Timber.d(icon + "   ICON LINK")
 
-        Card(modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, bottom = 8.dp, top = 8.dp).animateContentSize(),
+        Card(modifier = Modifier.fillMaxWidth()
+            .padding(start = 16.dp, end = 16.dp, bottom = 8.dp, top = 8.dp).animateContentSize(),
             onClick = {
                 expanded = !expanded
                 Timber.d(expanded.toString())
@@ -277,27 +281,47 @@ class WeatherFragment : Fragment() {
                     {
                         Text(
                             text = "$low$DEGREE_SYMBOL",
-                            modifier = Modifier.padding(8.dp, 4.dp)
+                            modifier = Modifier.padding(8.dp, 4.dp),
+                            fontSize = 18.sp
                         )
                         Text(
                             text = "$high$DEGREE_SYMBOL",
-                            modifier = Modifier.padding(8.dp, 4.dp)
+                            modifier = Modifier.padding(8.dp, 4.dp),
+                            fontSize = 18.sp
                         )
                     }
                 }
+                /**@TODO Figure out what exactly to display here, maybe  instead of writing out morning/daytime/evening/night write something shorthand or an icon? Probably not an icon idk, maybe immediately under the text
+                 * I think a row of columns would work where each column is the two texts one on top of the other. And then space out the columns accordingly with tome padding between the two elements in the column?
+                */
                 if (expanded) {
-                    Text(
-                        text = "$low$DEGREE_SYMBOL",
-                        modifier = Modifier.padding(8.dp, 4.dp)
-                    )
-                    Text(
-                        text = "$low$DEGREE_SYMBOL",
-                        modifier = Modifier.padding(8.dp, 4.dp)
-                    )
-                    Text(
-                        text = "$low$DEGREE_SYMBOL",
-                        modifier = Modifier.padding(8.dp, 4.dp)
-                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(8.dp),
+                        horizontalArrangement = Arrangement.Start,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(
+                            text = "Morning: $mornTemp$DEGREE_SYMBOL",
+                            modifier = Modifier.padding(8.dp, 4.dp).weight(1.0f),
+                            fontSize = 18.sp
+                        )
+                        Text(
+                            text = "Daytime: $dayTemp$DEGREE_SYMBOL",
+                            modifier = Modifier.padding(8.dp, 4.dp).weight(1.0f),
+                            fontSize = 18.sp
+                        )
+                        Text(
+                            text = "Evening: $eveTemp$DEGREE_SYMBOL",
+                            modifier = Modifier.padding(8.dp, 4.dp).weight(1.0f),
+                            fontSize = 18.sp
+                        )
+                        Text(
+                            text = "Night: $nightTemp$DEGREE_SYMBOL",
+                            modifier = Modifier.padding(8.dp, 4.dp).weight(1.0f),
+                            fontSize = 18.sp
+                        )
+                    }
+
                 }
             }
         }
