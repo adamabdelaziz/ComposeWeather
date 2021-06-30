@@ -42,11 +42,11 @@ const val SECONDS_IN_A_DAY = 86400
 
 //These two get weather icons from the API
 fun getIconSmall(iconId: String): String {
-    return "http://openweathermap.org/img/wn/$iconId@2x.png"
+    return "https://openweathermap.org/img/wn/$iconId@2x.png"
 }
 
 fun getIconLarge(iconId: String): String {
-    return "http://openweathermap.org/img/wn/$iconId@4x.png"
+    return "https://openweathermap.org/img/wn/$iconId@4x.png"
 }
 //mm to inches for rainfall/snowfall
 fun toInches(measurement: Double): Double {

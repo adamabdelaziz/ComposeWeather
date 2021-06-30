@@ -12,7 +12,9 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -49,6 +51,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import timber.log.Timber
 import kotlin.math.roundToInt
 
+@ExperimentalMaterialApi
 @AndroidEntryPoint
 class WeatherFragment : Fragment() {
 
@@ -165,7 +168,9 @@ class WeatherFragment : Fragment() {
             TopRow(title)
             CurrentCard(weatherState)
             DailyCard(weatherState)
-
+            Spacer(
+                modifier = Modifier.height(16.dp)
+            )
 
         }
     }
@@ -191,7 +196,10 @@ class WeatherFragment : Fragment() {
             title = { Text(cityName) },
             backgroundColor = MaterialTheme.colors.primary,
             actions = {
-                IconButton(onClick = { refreshLocation() }) {
+                IconButton(onClick = {
+                    refreshLocation()
+                    Toast.makeText(context, "Updating..", Toast.LENGTH_SHORT).show()
+                }) {
                     Icon(Icons.Filled.LocationOn, contentDescription = "Refresh Current Location")
                 }
                 IconButton(onClick = { goToSettings() }) {
@@ -213,24 +221,38 @@ class WeatherFragment : Fragment() {
 
     }
 
+
     @Composable
     fun DailyCard(weatherState: OneCall) {
         val daily = weatherState.daily
         val offSet = weatherState.offset
 
-        LazyColumn {
+        LazyColumn(modifier = Modifier.fillMaxWidth()) {
             items(daily) { day ->
                 DailyRow(day, offSet)
             }
         }
     }
 
+
+    //@TODO:Maybe some sort of long press somewhere that sets all expands to false?
     @Composable
     private fun DailyRow(day: Daily, offset: Int) {
         var expanded by remember { mutableStateOf(false) }
-        val high = day.temp.max.toString()
-        val low = day.temp.min.toString()
-        Card(modifier = Modifier.fillMaxWidth().padding(16.dp, 4.dp)) {
+
+        val high = day.temp.max.roundToInt().toString()
+        val low = day.temp.min.roundToInt().toString()
+
+        val weather = day.weather[0]
+
+        val icon = getIconLarge(weather.icon)
+        Timber.d(icon + "   ICON LINK")
+
+        Card(modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, bottom = 8.dp, top = 8.dp).animateContentSize(),
+            onClick = {
+                expanded = !expanded
+                Timber.d(expanded.toString())
+            }) {
             Column() {
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(8.dp),
@@ -240,7 +262,12 @@ class WeatherFragment : Fragment() {
                     ) {
                     Text(
                         text = getDayFromUnix(day.dt, offset),
-                        modifier = Modifier
+                        fontSize = 24.sp,
+
+                        )
+                    Image(
+                        painter = rememberCoilPainter(icon),
+                        contentDescription = stringResource(R.string.rain_icon_description),
                     )
                     Row(
                         modifier = Modifier.fillMaxWidth().padding(8.dp),
@@ -249,15 +276,28 @@ class WeatherFragment : Fragment() {
                     )
                     {
                         Text(
-                            text = "$high$DEGREE_SYMBOL",
-                            modifier = Modifier.padding(8.dp,4.dp)
+                            text = "$low$DEGREE_SYMBOL",
+                            modifier = Modifier.padding(8.dp, 4.dp)
                         )
                         Text(
-                            text = "$low$DEGREE_SYMBOL",
-                            modifier = Modifier.padding(8.dp,4.dp)
+                            text = "$high$DEGREE_SYMBOL",
+                            modifier = Modifier.padding(8.dp, 4.dp)
                         )
                     }
-
+                }
+                if (expanded) {
+                    Text(
+                        text = "$low$DEGREE_SYMBOL",
+                        modifier = Modifier.padding(8.dp, 4.dp)
+                    )
+                    Text(
+                        text = "$low$DEGREE_SYMBOL",
+                        modifier = Modifier.padding(8.dp, 4.dp)
+                    )
+                    Text(
+                        text = "$low$DEGREE_SYMBOL",
+                        modifier = Modifier.padding(8.dp, 4.dp)
+                    )
                 }
             }
         }
