@@ -6,6 +6,7 @@
 
     <string name="rain_icon_description">Rainfall/hourr</string>
     <string name="snow_icon_description">Snowfall/hour</string>
+    <string name="pop_icon_description">Probability of precipitation</string>
     <string name="cloud_icon_description">Cloud %</string>
     <string name="humidity_icon_description">Humidity %</string>
 </resources>

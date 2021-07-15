@@ -18,6 +18,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocationOn
@@ -35,6 +36,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import coil.compose.rememberImagePainter
 import com.example.composeweather.R
 import com.example.composeweather.domain.model.Daily
 import com.example.composeweather.domain.model.OneCall
@@ -42,7 +44,6 @@ import com.example.composeweather.domain.model.Rain
 import com.example.composeweather.domain.model.Snow
 import com.example.composeweather.ui.theme.ComposeWeatherTheme
 import com.example.composeweather.util.*
-import com.google.accompanist.coil.rememberCoilPainter
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
@@ -249,10 +250,16 @@ class WeatherFragment : Fragment() {
 
         val weather = day.weather[0]
         val icon = getIconLarge(weather.icon)
+
+        val rain = day.rain
+        val snow = day.snow
+        val pop = day.pop.times(100)
+
         Timber.d(icon + "   ICON LINK")
 
         Card(modifier = Modifier.fillMaxWidth()
             .padding(start = 16.dp, end = 16.dp, bottom = 8.dp, top = 8.dp).animateContentSize(),
+            shape = RoundedCornerShape(20.dp),
             onClick = {
                 expanded = !expanded
                 Timber.d(expanded.toString())
@@ -270,8 +277,9 @@ class WeatherFragment : Fragment() {
 
                         )
                     Image(
-                        painter = rememberCoilPainter(icon),
+                        painter = rememberImagePainter(icon),
                         contentDescription = stringResource(R.string.rain_icon_description),
+                        modifier = Modifier.size(64.dp)
                     )
                     Row(
                         modifier = Modifier.fillMaxWidth().padding(8.dp),
@@ -293,33 +301,155 @@ class WeatherFragment : Fragment() {
                 }
                 /**@TODO Figure out what exactly to display here, maybe  instead of writing out morning/daytime/evening/night write something shorthand or an icon? Probably not an icon idk, maybe immediately under the text
                  * I think a row of columns would work where each column is the two texts one on top of the other. And then space out the columns accordingly with tome padding between the two elements in the column?
-                */
+                 */
                 if (expanded) {
+                    //Specific Temp row. Columns used to stack the elements evenly
                     Row(
                         modifier = Modifier.fillMaxWidth().padding(8.dp),
                         horizontalArrangement = Arrangement.Start,
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Text(
-                            text = "Morning: $mornTemp$DEGREE_SYMBOL",
+                        Column(
                             modifier = Modifier.padding(8.dp, 4.dp).weight(1.0f),
-                            fontSize = 18.sp
+                            horizontalAlignment = Alignment.CenterHorizontally
                         )
-                        Text(
-                            text = "Daytime: $dayTemp$DEGREE_SYMBOL",
+                        {
+                            Text(
+                                text = "$mornTemp$DEGREE_SYMBOL",
+                                modifier = Modifier,
+                                fontSize = 18.sp
+                            )
+                            Text(
+                                text = "Morning",
+                                modifier = Modifier,
+                                fontSize = 18.sp
+                            )
+                        }
+                        Column(
                             modifier = Modifier.padding(8.dp, 4.dp).weight(1.0f),
-                            fontSize = 18.sp
-                        )
-                        Text(
-                            text = "Evening: $eveTemp$DEGREE_SYMBOL",
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                text = "$dayTemp$DEGREE_SYMBOL",
+                                modifier = Modifier,
+                                fontSize = 18.sp
+                            )
+                            Text(
+                                text = "Day",
+                                modifier = Modifier,
+                                fontSize = 18.sp
+                            )
+                        }
+                        Column(
                             modifier = Modifier.padding(8.dp, 4.dp).weight(1.0f),
-                            fontSize = 18.sp
-                        )
-                        Text(
-                            text = "Night: $nightTemp$DEGREE_SYMBOL",
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                text = "$eveTemp$DEGREE_SYMBOL",
+                                modifier = Modifier,
+                                fontSize = 18.sp
+                            )
+                            Text(
+                                text = "Evening",
+                                modifier = Modifier,
+                                fontSize = 18.sp
+                            )
+                        }
+                        Column(
                             modifier = Modifier.padding(8.dp, 4.dp).weight(1.0f),
-                            fontSize = 18.sp
-                        )
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                text = "$nightTemp$DEGREE_SYMBOL",
+                                modifier = Modifier,
+                                fontSize = 18.sp
+                            )
+                            Text(
+                                text = "Night",
+                                modifier = Modifier,
+                                fontSize = 18.sp
+                            )
+                        }
+
+                    }
+                    //This will be the other types of things like rainfall/snowfall etc
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(8.dp),
+                        horizontalArrangement = Arrangement.Start,
+                        verticalAlignment = Alignment.CenterVertically,
+                    )
+                    {
+                        if (rain > 0.0) {
+                            Column(
+                                modifier = Modifier.padding(8.dp, 4.dp).weight(1.0f),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Image(
+                                    painter = rememberImagePainter(RAIN_ICON_NIGHT),
+                                    contentDescription = stringResource(R.string.rain_icon_description),
+                                    modifier = Modifier.clickable(onClick = {
+                                        Toast.makeText(
+                                            context,
+                                            R.string.rain_icon_description,
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }).size(64.dp)
+                                )
+                                Text(
+                                    text = "${toInches(rain)} in.",
+                                    modifier = Modifier.padding(4.dp),
+                                    fontSize = 16.sp
+                                )
+                            }
+                        }
+                        if (snow > 0.0) {
+                            Column(
+                                modifier = Modifier.padding(8.dp, 4.dp).weight(1.0f),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+
+                                Image(
+                                    painter = rememberImagePainter(SNOW_ICON_NIGHT),
+                                    contentDescription = stringResource(R.string.snow_icon_description),
+                                    modifier = Modifier.clickable(onClick = {
+                                        Toast.makeText(
+                                            context,
+                                            R.string.snow_icon_description,
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }).size(64.dp)
+                                )
+                                Text(
+                                    text = "${toInches(snow)} in.",
+                                    modifier = Modifier.padding(4.dp),
+                                    fontSize = 16.sp
+                                )
+                            }
+                        }
+                        if (pop > 0.0) {
+
+                            Column(
+                                modifier = Modifier.padding(8.dp, 4.dp).weight(1.0f),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Image(
+                                    painter = rememberImagePainter(R.drawable.pop),
+                                    contentDescription = stringResource(R.string.pop_icon_description),
+                                    modifier = Modifier.clickable(onClick = {
+                                        Toast.makeText(
+                                            context,
+                                            R.string.pop_icon_description,
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }).size(64.dp)
+                                )
+                                Text(
+                                    text = "${pop.roundTo(2)} %",
+                                    modifier = Modifier.padding(4.dp),
+                                    fontSize = 16.sp
+                                )
+                            }
+                        }
                     }
 
                 }
@@ -351,6 +481,7 @@ class WeatherFragment : Fragment() {
 
         Card(
             modifier = Modifier.fillMaxWidth().padding(16.dp),
+            shape = RoundedCornerShape(20.dp)
         ) {
             Column(
                 //Column modifiers go here
@@ -378,7 +509,7 @@ class WeatherFragment : Fragment() {
                 ) {
                     if (rain > 0.0) {
                         Image(
-                            painter = rememberCoilPainter(RAIN_ICON_NIGHT),
+                            painter = rememberImagePainter(RAIN_ICON_NIGHT),
                             contentDescription = stringResource(R.string.rain_icon_description),
                             modifier = Modifier.clickable(onClick = {
                                 Toast.makeText(
@@ -386,7 +517,7 @@ class WeatherFragment : Fragment() {
                                     R.string.rain_icon_description,
                                     Toast.LENGTH_SHORT
                                 ).show()
-                            })
+                            }).size(64.dp)
                         )
                         Text(
                             text = "${toInches(rain)} in.",
@@ -396,7 +527,7 @@ class WeatherFragment : Fragment() {
                     }
                     if (snow > 0.0) {
                         Image(
-                            painter = rememberCoilPainter(SNOW_ICON_NIGHT),
+                            painter = rememberImagePainter(SNOW_ICON_NIGHT),
                             contentDescription = stringResource(R.string.snow_icon_description),
                             modifier = Modifier.clickable(onClick = {
                                 Toast.makeText(
@@ -404,7 +535,7 @@ class WeatherFragment : Fragment() {
                                     R.string.snow_icon_description,
                                     Toast.LENGTH_SHORT
                                 ).show()
-                            })
+                            }).size(64.dp)
                         )
                         Text(
                             text = "${toInches(snow)} in.",
@@ -415,7 +546,7 @@ class WeatherFragment : Fragment() {
                     when (clouds.toInt()) {
                         in 0..25 -> {
                             Image(
-                                painter = rememberCoilPainter(FEW_CLOUDS_NIGHT),
+                                painter = rememberImagePainter(FEW_CLOUDS_NIGHT),
                                 contentDescription = stringResource(R.string.cloud_icon_description),
                                 modifier = Modifier.clickable(onClick = {
                                     Toast.makeText(
@@ -423,12 +554,12 @@ class WeatherFragment : Fragment() {
                                         R.string.cloud_icon_description,
                                         Toast.LENGTH_SHORT
                                     ).show()
-                                })
+                                }).size(64.dp)
                             )
                         }
                         in 25..50 -> {
                             Image(
-                                painter = rememberCoilPainter(SCATTERED_CLOUDS_NIGHT),
+                                painter = rememberImagePainter(SCATTERED_CLOUDS_NIGHT),
                                 contentDescription = stringResource(R.string.cloud_icon_description),
                                 modifier = Modifier.clickable(onClick = {
                                     Toast.makeText(
@@ -436,12 +567,12 @@ class WeatherFragment : Fragment() {
                                         R.string.cloud_icon_description,
                                         Toast.LENGTH_SHORT
                                     ).show()
-                                })
+                                }).size(64.dp)
                             )
                         }
                         in 50..100 -> {
                             Image(
-                                painter = rememberCoilPainter(OVERCAST_CLOUDS_NIGHT),
+                                painter = rememberImagePainter(OVERCAST_CLOUDS_NIGHT),
                                 contentDescription = stringResource(R.string.cloud_icon_description),
                                 modifier = Modifier.clickable(onClick = {
                                     Toast.makeText(
@@ -449,7 +580,7 @@ class WeatherFragment : Fragment() {
                                         R.string.cloud_icon_description,
                                         Toast.LENGTH_SHORT
                                     ).show()
-                                })
+                                }).size(64.dp)
 
                             )
                         }

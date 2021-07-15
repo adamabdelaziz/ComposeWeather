@@ -2,6 +2,8 @@ package com.example.composeweather.util
 
 import timber.log.Timber
 import java.lang.Math.floor
+import kotlin.math.pow
+import kotlin.math.roundToInt
 
 const val API_KEY = "e8e98e12bdbf52acbf23acc3257c613a"
 
@@ -49,8 +51,14 @@ fun getIconLarge(iconId: String): String {
     return "https://openweathermap.org/img/wn/$iconId@4x.png"
 }
 //mm to inches for rainfall/snowfall
-fun toInches(measurement: Double): Double {
-    return measurement.div(25.4)
+fun toInches(measurement: Double): String {
+    return measurement.times(0.0394).toString().substring(0,4)
+    //.roundTo(4).toString()
+
+}
+fun Double.roundTo(numFractionDigits: Int): Double {
+    val factor = 10.0.pow(numFractionDigits.toDouble())
+    return (this * factor).roundToInt() / factor
 }
 // Gets the day of the week from the UnixTime and Offset
 fun getDayFromUnix(unixTime: Int, offset: Int): String {
@@ -61,13 +69,13 @@ fun getDayFromUnix(unixTime: Int, offset: Int): String {
     val result = div.rem(7)
     Timber.d("$result is result")
     return when (result) {
-        0.0 -> "Thursday"
-        1.0 -> "Friday"
-        2.0 -> "Saturday"
-        3.0 -> "Sunday"
-        4.0 -> "Monday"
-        5.0 -> "Tuesday"
-        6.0 -> "Wednesday"
+        0.0 -> "Thu."
+        1.0 -> "Fri."
+        2.0 -> "Sat."
+        3.0 -> "Sun."
+        4.0 -> "Mon."
+        5.0 -> "Tue."
+        6.0 -> "Wed."
         else -> "Nani??"
     }
 }
