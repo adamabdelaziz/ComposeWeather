@@ -21,6 +21,7 @@ class WeatherRepository @Inject constructor(
 
             Timber.d(oneCall.timezone + "timeZone")
             Timber.d("${oneCall.current}" + " Current")
+            Timber.d("${oneCall.alerts}" + " Alerts")
 
             localDataSource.insertOneCall(oneCall)
             return oneCall

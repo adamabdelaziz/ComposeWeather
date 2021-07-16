@@ -299,9 +299,6 @@ class WeatherFragment : Fragment() {
                         )
                     }
                 }
-                /**@TODO Figure out what exactly to display here, maybe  instead of writing out morning/daytime/evening/night write something shorthand or an icon? Probably not an icon idk, maybe immediately under the text
-                 * I think a row of columns would work where each column is the two texts one on top of the other. And then space out the columns accordingly with tome padding between the two elements in the column?
-                 */
                 if (expanded) {
                     //Specific Temp row. Columns used to stack the elements evenly
                     Row(
@@ -458,11 +455,16 @@ class WeatherFragment : Fragment() {
 
     }
 
-
+    /**
+     * Maybe make this expandable as well? And display hourly information here? Probably wont be very useful if it shows hours that already past though
+     * Also add alerts here maybe as a clickable dialog or something
+     */
     @Composable
     fun CurrentCard(weatherState: OneCall) {
 
         val current = weatherState.current
+        val alerts = weatherState.alerts
+        var openDialog by remember { mutableStateOf(false) }
 
         val temp = current.temp.roundToInt()
         val feelsLike = current.feels_like.roundToInt()
@@ -478,6 +480,57 @@ class WeatherFragment : Fragment() {
 
         Timber.d("$rain + currentCardRain")
         val timezone = weatherState.timezone
+
+
+        if (openDialog) {
+
+            AlertDialog(
+                onDismissRequest = {
+                    // Dismiss the dialog when the user clicks outside the dialog or on the back
+                    // button. If you want to disable that functionality, simply use an empty
+                    // onCloseRequest.
+                    openDialog = false
+                },
+//                title = {
+//                    Text(text = "Weather Alerts")
+//                },
+                text = {
+                    Column() {
+                        for (alert in alerts) {
+                            Text(
+                                text = alert.event,
+                                fontSize = 32.sp
+                            )
+
+                            Text(
+                                text = alert.description,
+                                fontSize =16.sp
+                            )
+                            Spacer(modifier = Modifier.size(8.dp))
+                        }
+                    }
+
+
+                },
+                confirmButton = {
+                    Button(
+
+                        onClick = {
+                            openDialog = false
+                        }) {
+                        Text("Thanks Bro")
+                    }
+                })
+//                dismissButton = {
+//                    Button(
+//
+//                        onClick = {
+//                            openDialog = false
+//                        }) {
+//                        Text("D")
+//                    }
+//                })
+        }
 
         Card(
             modifier = Modifier.fillMaxWidth().padding(16.dp),
@@ -591,7 +644,7 @@ class WeatherFragment : Fragment() {
                         fontSize = 16.sp
                     )
                     Image(
-                        painter = painterResource(R.drawable.humidity200xx),
+                        painter = rememberImagePainter(R.drawable.humidity200xx),
                         contentDescription = stringResource(R.string.humidity_icon_description),
                         modifier = Modifier.clickable(onClick = {
                             Toast.makeText(
@@ -599,13 +652,23 @@ class WeatherFragment : Fragment() {
                                 R.string.humidity_icon_description,
                                 Toast.LENGTH_SHORT
                             ).show()
-                        })
+                        }).size(64.dp)
                     )
                     Text(
                         text = "$humidity%",
-                        modifier = Modifier.padding(4.dp),
+                        modifier = Modifier.padding(8.dp),
                         fontSize = 16.sp
                     )
+                    if (alerts != null) {
+                        Image(
+                            painter = rememberImagePainter(R.drawable.outline_warning_white_24),
+                            contentDescription = stringResource(R.string.humidity_icon_description),
+                            modifier = Modifier.clickable(onClick = {
+                                openDialog = true
+                            }).size(40.dp)
+                        )
+
+                    }
                 }
             }
         }

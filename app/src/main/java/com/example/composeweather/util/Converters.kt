@@ -64,4 +64,20 @@ class Converters {
     fun stringToMinutelyList(value: String?) =
         Gson().fromJson(value, Array<Minutely>::class.java).toList()
 
+
+    //ListAlert
+    @TypeConverter
+    fun alertListToString(value: List<Alert>?) = Gson().toJson(value)
+
+    @TypeConverter
+    fun stringToAlertList(value: String?) =
+        Gson().fromJson(value, Array<Alert>::class.java).toList()
+
+    //Alert
+    @TypeConverter
+    fun alertToString(alert: Alert?): String? = Gson().toJson(alert) ?: ""
+
+    @TypeConverter
+    fun stringToAlert(string: String?): Alert? = Gson().fromJson(string, Alert::class.java)
+
 }
