@@ -7,6 +7,19 @@
     <fragment
         android:id="@+id/weatherFragment"
         android:name="com.example.composeweather.ui.weather.WeatherFragment"
-        android:label="WeatherFragment" />
+        android:label="WeatherFragment" >
+        <action
+            android:id="@+id/action_weatherFragment_to_settingsFragment"
+            app:destination="@id/settingsFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="com.example.composeweather.ui.settings.SettingsFragment"
+        android:label="SettingsFragment" >
+        <action
+            android:id="@+id/action_settingsFragment_to_weatherFragment"
+            app:destination="@id/weatherFragment" />
+    </fragment>
 
 </navigation>

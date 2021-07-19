@@ -29,19 +29,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import coil.compose.rememberImagePainter
 import com.example.composeweather.R
 import com.example.composeweather.domain.model.Daily
 import com.example.composeweather.domain.model.OneCall
 import com.example.composeweather.domain.model.Rain
 import com.example.composeweather.domain.model.Snow
+import com.example.composeweather.ui.settings.SettingsViewModel
 import com.example.composeweather.ui.theme.ComposeWeatherTheme
 import com.example.composeweather.util.*
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
@@ -56,6 +57,8 @@ import kotlin.math.roundToInt
 class WeatherFragment : Fragment() {
 
     private val viewModel: WeatherViewModel by viewModels()
+    private val settingsViewModel: SettingsViewModel by viewModels()
+
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var requestPermissionLauncher: ActivityResultLauncher<String>
     private lateinit var geocoder: Geocoder
@@ -63,7 +66,7 @@ class WeatherFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
 
         geocoder = Geocoder(context)
-
+        Timber.d("onCreate called in WeatherFragment")
         requestPermissionLauncher =
             registerForActivityResult(
                 ActivityResultContracts.RequestPermission()
@@ -72,8 +75,9 @@ class WeatherFragment : Fragment() {
                     Timber.d("Permission granted")
                     //Wondering if this will call it twice in a row but if the permission gets granted for the first time this should allow it to continue to update the weather
                     //instead of making the user click the button twice
-                    refreshLocation()
+                    //refreshLocation()
                 } else {
+                    //Probably
                     Timber.d("Permission denied")
                     Toast.makeText(
                         context,
@@ -93,43 +97,84 @@ class WeatherFragment : Fragment() {
     ): View {
         return ComposeView(requireContext()).apply {
 
-
+            Timber.d("onCreateView called in WeatherFragment")
             //Trying to get rid of this fake data but not quite there yet
-            viewModel.getWeather(NYC_LAT, NYC_LON)
-            Timber.d("getWeather Called in VM from Fragment with that boofy data")
+            // viewModel.getWeather(NYC_LAT, NYC_LON)
+            //Timber.d("getWeather Called in VM from Fragment with that boofy data")
 
             val oneCallLiveData = viewModel.oneCall
+
 
             if (ActivityCompat.checkSelfPermission(
                     requireContext(),
                     Manifest.permission.ACCESS_COARSE_LOCATION
-                ) == PackageManager.PERMISSION_GRANTED
-            ) {
+                ) == PackageManager.PERMISSION_GRANTED) {
                 Timber.d("Permission already granted from before onCreateView() is called")
                 refreshLocation()
             } else {
                 requestPermissionLauncher.launch(Manifest.permission.ACCESS_COARSE_LOCATION)
             }
+            //Even when granting permissions it thinks you didnt until running the app a second time.
+            //Hitting refresh location button seems to change it twice, once to correct v alue then back again to default value if the permission was denied initially, works fine otherwise.
+            //Works fine if the permission was denied initally then granted, then app closed and reopened
+            if (ActivityCompat.checkSelfPermission(
+                    requireContext(),
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED) {
+                setContent {
+                    Timber.d("setContent called with permissions granted")
+                    val weatherState by oneCallLiveData.observeAsState(initial = oneCallLiveData.value)
 
-
-            setContent {
-                Timber.d("setContent called")
-                val weatherState by oneCallLiveData.observeAsState(initial = oneCallLiveData.value)
-
-                if (weatherState != null) {
-                    ComposeWeatherTheme {
-                        Timber.d("weatherState!=null; calling MainWeatherComponent()")
-                        MainWeatherComponent(weatherState!!)
-                    }
-                } else {
-                    ComposeWeatherTheme {
-                        Timber.d("weatherState==null; calling LiveDataLoadingComponent()")
-                        LiveDataLoadingComponent()
+                    if (weatherState != null) {
+                        ComposeWeatherTheme {
+                            Timber.d("weatherState!=null; calling MainWeatherComponent()")
+                            MainWeatherComponent(weatherState!!)
+                        }
+                    } else {
+                        ComposeWeatherTheme {
+                            Timber.d("weatherState==null; calling LiveDataLoadingComponent()")
+                            LiveDataLoadingComponent()
+                        }
                     }
                 }
+            } else {
+                setContent {
+                    Timber.d("setContent called with permissions denied")
+                    //Load fake data and they can get permission again by clicking location icon in top bar
+                    viewModel.getWeather(NYC_LAT, NYC_LON)
+                    val weatherState by oneCallLiveData.observeAsState(initial = oneCallLiveData.value)
+
+                    if (weatherState != null) {
+                        ComposeWeatherTheme {
+                            Timber.d("weatherState!=null; calling MainWeatherComponent()")
+                            MainWeatherComponent(weatherState!!)
+                        }
+                    } else {
+                        ComposeWeatherTheme {
+                            Timber.d("weatherState==null; calling LiveDataLoadingComponent()")
+                            LiveDataLoadingComponent()
+                        }
+                    }
+                }
+
             }
+
         }
     }
+
+//    @Composable
+//    fun NoPermissions() {
+//        Column(
+//            modifier = Modifier.fillMaxSize(),
+//            verticalArrangement = Arrangement.Center,
+//            horizontalAlignment = Alignment.CenterHorizontally
+//        ) {
+//            Text(
+//                text = "Enable that shit bro",
+//                fontSize = 32.sp
+//            )
+//        }
+//    }
 
     @Composable
     fun SetStatusBar() {
@@ -504,7 +549,7 @@ class WeatherFragment : Fragment() {
 
                             Text(
                                 text = alert.description,
-                                fontSize =16.sp
+                                fontSize = 16.sp
                             )
                             Spacer(modifier = Modifier.size(8.dp))
                         }
@@ -659,7 +704,8 @@ class WeatherFragment : Fragment() {
                         modifier = Modifier.padding(8.dp),
                         fontSize = 16.sp
                     )
-                    if (alerts != null) {
+                    //Except this isnt always true and its crashed because it was null when there were no alerts soooo
+                    if (alerts !== null) {
                         Image(
                             painter = rememberImagePainter(R.drawable.outline_warning_white_24),
                             contentDescription = stringResource(R.string.humidity_icon_description),
@@ -746,7 +792,8 @@ class WeatherFragment : Fragment() {
     }
 
     private fun goToSettings() {
-
+        val navController = findNavController()
+        navController.navigate(R.id.action_weatherFragment_to_settingsFragment)
     }
 
 }

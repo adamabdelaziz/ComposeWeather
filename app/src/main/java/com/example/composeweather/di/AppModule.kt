@@ -1,12 +1,13 @@
 package com.example.composeweather.di
 
-import android.app.Activity
 import android.content.Context
-import com.example.composeweather.domain.db.AppDatabase
 import com.example.composeweather.domain.dao.WeatherDao
+import com.example.composeweather.domain.db.AppDatabase
 import com.example.composeweather.network.WeatherService
+import com.example.composeweather.preference.DataStoreManager
 import com.example.composeweather.repository.WeatherRepository
 import com.example.composeweather.util.BASE_URL
+import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
@@ -51,15 +52,22 @@ object AppModule {
 
     @Singleton
     @Provides
+    fun provideDataStoreManager(@ApplicationContext appContext: Context): DataStoreManager =
+        DataStoreManager(appContext)
+
+    @Singleton
+    @Provides
     fun provideWeatherDao(db: AppDatabase) = db.weatherDao()
+
+
+    @Provides
+    fun provideFusedLocationProvider(@ApplicationContext appContext: Context): FusedLocationProviderClient =
+        LocationServices.getFusedLocationProviderClient(appContext)
 
     @Singleton
     @Provides
     fun provideRepository(remoteDataSource: WeatherService, localDataSource: WeatherDao) =
         WeatherRepository(remoteDataSource, localDataSource)
-
-
-
 
 
 }
