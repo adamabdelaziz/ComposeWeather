@@ -11,13 +11,13 @@ const val BASE_URL = "https://api.openweathermap.org/data/2.5/"
 
 const val FAHRENHEIT = "IMPERIAL"
 
-//const val NYC_LAT = 40.7131.toString()
-//
-//const val NYC_LON = (-74.0072).toString()
+const val NYC_LAT = 40.7131.toString()
 
-const val NYC_LAT = 42.3601.toString()
+const val NYC_LON = (-74.0072).toString()
 
-const val NYC_LON = 71.0589.toString()
+//const val NYC_LAT = 42.3601.toString()
+
+//const val NYC_LON = 71.0589.toString()
 
 const val DEGREE_SYMBOL = "\u00B0"
 
@@ -57,21 +57,19 @@ fun getIconLarge(iconId: String): String {
 //mm to inches for rainfall/snowfall
 fun toInches(measurement: Double): String {
     return measurement.times(0.0394).toString().substring(0,4)
-    //.roundTo(4).toString()
-
 }
+
 fun Double.roundTo(numFractionDigits: Int): Double {
     val factor = 10.0.pow(numFractionDigits.toDouble())
+
     return (this * factor).roundToInt() / factor
 }
 // Gets the day of the week from the UnixTime and Offset
 fun getDayFromUnix(unixTime: Int, offset: Int): String {
     val time = unixTime - offset
-    //Timber.d("$time is time")
     val div = floor(time.div(SECONDS_IN_A_DAY).toDouble())
-   // Timber.d("$div is div")
     val result = div.rem(7)
-   // Timber.d("$result is result")
+
     return when (result) {
         0.0 -> "Thu."
         1.0 -> "Fri."

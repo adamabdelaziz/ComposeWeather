@@ -38,11 +38,6 @@ object AppModule {
     fun provideWeatherService(retrofit: Retrofit): WeatherService =
         retrofit.create(WeatherService::class.java)
 
-//    @Singleton
-//    @Provides
-//    fun provideWeatherRemoteDataSource(weatherService: WeatherService) = WeatherRemoteDataSource(
-//        weatherService
-//    )
 
     @Singleton
     @Provides

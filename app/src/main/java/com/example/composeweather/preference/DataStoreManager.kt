@@ -28,6 +28,7 @@ class DataStoreManager @Inject constructor(@ApplicationContext appContext: Conte
 
     private object PreferencesKeys {
         val CELSIUS_ENABLED = booleanPreferencesKey("celsius")
+        val LOCATION_ENABLED = booleanPreferencesKey("location")
     }
 
     val preferencesFlow = settingsDataStore.data
@@ -44,6 +45,25 @@ class DataStoreManager @Inject constructor(@ApplicationContext appContext: Conte
             val celsiusEnabled = preferences[PreferencesKeys.CELSIUS_ENABLED] ?: false
             WeatherPreferences(celsiusEnabled)
         }
+    val locationFlow  = settingsDataStore.data
+        .catch { exception ->
+            if (exception is IOException) {
+                Timber.d("IO Exception " + exception)
+                emit(emptyPreferences())
+            } else {
+                throw exception
+            }
+        }
+        .map { preferences ->
+            val locationEnabled = preferences[PreferencesKeys.LOCATION_ENABLED] ?: false
+            locationEnabled
+        }
+
+    suspend fun updateLocationEnabled(locationEnabled: Boolean) {
+        settingsDataStore.edit { preferences ->
+            preferences[PreferencesKeys.LOCATION_ENABLED] = locationEnabled
+        }
+    }
 
     suspend fun updateCelsiusEnabled(celsiusEnabled: Boolean) {
         settingsDataStore.edit { preferences ->
@@ -52,19 +72,3 @@ class DataStoreManager @Inject constructor(@ApplicationContext appContext: Conte
         }
     }
 }
-
-
-//    suspend fun setValue(key: String, value: Boolean) {
-//        val wrappedKey = booleanPreferencesKey(key)
-//        settingsDataStore.edit {
-//            it[wrappedKey] = value
-//        }
-//    }
-//
-//    suspend fun getValue(key: String): Boolean {
-//        val wrappedKey = booleanPreferencesKey(key)
-//        val valueFlow: Flow<Boolean> = settingsDataStore.data.map {
-//            it[wrappedKey] ?: false
-//        }
-//        return valueFlow.first()
-//    }

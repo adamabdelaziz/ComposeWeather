@@ -1,37 +1,55 @@
 package com.example.composeweather.ui.settings
 
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
+import com.example.composeweather.domain.model.OneCall
 import com.example.composeweather.preference.DataStoreManager
+import com.example.composeweather.preference.WeatherPreferences
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
-class SettingsViewModel @Inject constructor(private val dataSoreManager: DataStoreManager) :
+class SettingsViewModel @Inject constructor(
+    private val dataSoreManager: DataStoreManager) :
     ViewModel() {
 
     //Gets settings as a Flow
 
     val preferencesFlow = dataSoreManager.preferencesFlow
+    val locationFlow = dataSoreManager.locationFlow
+
+    private val _prefs = MutableLiveData<WeatherPreferences>()
+    val prefs : LiveData<WeatherPreferences> get() = _prefs
+
+    private val _location = MutableLiveData<Boolean>()
+    val location: LiveData<Boolean> get() = _location
 
     //Fragment interacts with this method which interacts with DataStoreManager
 
     fun onCelsiusSettingSelected(celsiusSetting : Boolean){
         viewModelScope.launch {
             dataSoreManager.updateCelsiusEnabled(celsiusSetting)
+            _prefs.value = preferencesFlow.first()
         }
     }
 
+    fun onLocationSettingsSelected(locationSetting: Boolean){
+        viewModelScope.launch {
+            dataSoreManager.updateLocationEnabled(locationSetting)
+            _location.value = locationSetting
+        }
+    }
+
+
+    init{
+        Timber.d("SettingsViewModel init start")
+        viewModelScope.launch {
+            _location.value = locationFlow.first()
+            _prefs.value = preferencesFlow.first()
+        }
+        Timber.d("SettingsViewModel init end")
+    }
 }
-
-
-//private val _setting = MutableLiveData<Boolean>()
-//val setting: LiveData<Boolean> get() = _setting
-//
-//fun getSettingValue(key: String) {
-//    viewModelScope.launch {
-//        val settingResult = dataSoreManager.getValue(key)
-//        _setting.value = settingResult
-//    }
-//}
