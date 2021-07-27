@@ -19,8 +19,8 @@ class WeatherRepository @Inject constructor(
     private val localDataSource: WeatherDao,
 ) {
 
-    suspend fun getOneCall(lat: String, lon: String): OneCall {
-        val oneCall = remoteDataSource.getOneCallLatLon(lat, lon, API_KEY, FAHRENHEIT)
+    suspend fun getOneCall(lat: String, lon: String, unit: String): OneCall {
+        val oneCall = remoteDataSource.getOneCallLatLon(lat, lon, API_KEY, unit)
 
         if (oneCall != null) {
             Timber.d("ONECALL NOT NULL")

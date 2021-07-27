@@ -9,7 +9,9 @@ const val API_KEY = "e8e98e12bdbf52acbf23acc3257c613a"
 
 const val BASE_URL = "https://api.openweathermap.org/data/2.5/"
 
-const val FAHRENHEIT = "IMPERIAL"
+const val FAHRENHEIT : String = "IMPERIAL"
+
+const val CELSIUS : String = "METRIC"
 
 const val NYC_LAT = 40.7131.toString()
 
