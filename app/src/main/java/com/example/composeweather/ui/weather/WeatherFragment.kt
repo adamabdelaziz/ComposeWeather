@@ -178,7 +178,7 @@ fun SetStatusBar() {
 }
 
 @Composable
-fun MainWeatherComponent(weatherState: OneCall) {
+fun MainWeatherComponent(weatherState: OneCall){
 
 
     val addressList = geocoder.getFromLocation(weatherState.lat, weatherState.lon, 5)
@@ -528,7 +528,7 @@ fun CurrentCard(weatherState: OneCall) {
                     onClick = {
                         openDialog = false
                     }) {
-                    Text("Thanks Bro")
+                    Text(stringResource(R.string.thanks_bro))
                 }
             })
 //                dismissButton = {

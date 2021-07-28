@@ -9,4 +9,6 @@
     <string name="pop_icon_description">Probability of precipitation</string>
     <string name="cloud_icon_description">Cloud %</string>
     <string name="humidity_icon_description">Humidity %</string>
+    <string name="settings_title">Settings</string>
+    <string name="thanks_bro">Thanks Bro</string>
 </resources>

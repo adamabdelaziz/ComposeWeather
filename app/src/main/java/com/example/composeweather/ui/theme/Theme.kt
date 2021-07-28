@@ -9,7 +9,8 @@ import androidx.compose.runtime.Composable
 private val DarkColorPalette = darkColors(
     primary = Purple200,
     primaryVariant = Purple700,
-    secondary = Teal200
+    secondary = Teal200,
+
 )
 
 private val LightColorPalette = lightColors(
@@ -37,10 +38,15 @@ fun ComposeWeatherTheme(
     } else {
         LightColorPalette
     }
+    val typography = if(darkTheme){
+        TypographyDark
+    }else{
+        Typography
+    }
 
     MaterialTheme(
         colors = colors,
-        typography = Typography,
+        typography = typography,
         shapes = Shapes,
         content = content
     )

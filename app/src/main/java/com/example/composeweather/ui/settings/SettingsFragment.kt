@@ -13,19 +13,18 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.asLiveData
-import androidx.lifecycle.lifecycleScope
+import com.example.composeweather.R
 import com.example.composeweather.preference.WeatherPreferences
 import com.example.composeweather.ui.theme.ComposeWeatherTheme
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.first
 import timber.log.Timber
+
 
 @ExperimentalMaterialApi
 @AndroidEntryPoint
@@ -46,15 +45,16 @@ class SettingsFragment : Fragment() {
         return ComposeView(requireContext()).apply {
 
             val prefLiveData = settingsViewModel.prefs
+//            val prefFlow = settingsViewModel.preferencesFlow
             setContent {
 
                 val prefs by prefLiveData.observeAsState(initial = prefLiveData.value)
-
+//                val prefFlows by prefFlow.collectAsState(initial = prefFlow.first())
 
                 if (prefs != null) {
                     Timber.d(prefs.toString() + " weatherPreferences not null")
                     ComposeWeatherTheme {
-                        SettingsList(prefs!!)
+                        SettingsScreen(prefs!!)
                     }
                 } else {
                     Timber.d(prefs.toString() + " weatherPreferences null")
@@ -65,6 +65,34 @@ class SettingsFragment : Fragment() {
             }
         }
     }
+
+    @Composable
+    fun SettingsScreen(preferences: WeatherPreferences) {
+
+        SetStatusBar()
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            //verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            TopRow()
+            SettingsList(preferences)
+        }
+
+    }
+
+    @Composable
+    fun LiveDataLoadingComponent() {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+
+            CircularProgressIndicator(modifier = Modifier.wrapContentWidth(Alignment.CenterHorizontally))
+        }
+    }
+
 
     @Composable
     fun SetStatusBar() {
@@ -82,55 +110,65 @@ class SettingsFragment : Fragment() {
     }
 
     @Composable
-    fun LiveDataLoadingComponent() {
-
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-
-            CircularProgressIndicator(modifier = Modifier.wrapContentWidth(Alignment.CenterHorizontally))
-        }
+    fun TopRow() {
+        TopAppBar(
+            title = { Text(stringResource(R.string.settings_title)) },
+            backgroundColor = MaterialTheme.colors.primary,
+        )
     }
-
-
 
     @Composable
     fun SettingsList(preferences: WeatherPreferences) {
-
-        SetStatusBar()
         Column(
             modifier = Modifier.fillMaxSize(),
             //verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Timber.d(preferences.celsiusEnabled.toString())
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(8.dp),
-                horizontalArrangement = Arrangement.Start,
-                verticalAlignment = Alignment.CenterVertically,
+            Spacer(
+                modifier = Modifier.height(16.dp)
+            )
+            Column(
+                modifier = Modifier.fillMaxSize(),
+            )
+            {
 
-                ) {
-                Text(
-                    text = "Use Celsius",
-                    fontSize = 24.sp,
-                )
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(8.dp),
-                    horizontalArrangement = Arrangement.End,
+                    horizontalArrangement = Arrangement.Start,
                     verticalAlignment = Alignment.CenterVertically,
 
                     ) {
-                    Switch(preferences.celsiusEnabled, onCheckedChange = {
-                        settingsViewModel.onCelsiusSettingSelected(it)
-                    })
+                    Text(
+                        text = "Use Celsius",
+                        fontSize = 24.sp
+                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(8.dp),
+                        horizontalArrangement = Arrangement.End,
+                        verticalAlignment = Alignment.CenterVertically,
+
+                        ) {
+                        Switch(preferences.celsiusEnabled, onCheckedChange = {
+                            settingsViewModel.onCelsiusSettingSelected(it)
+                        })
+                    }
                 }
+                Divider(
+                    modifier = Modifier.padding(0.dp, 8.dp, 8.dp, 2.dp),
+                    thickness = 2.dp,
+                    color = MaterialTheme.colors.secondary
+                )
+
             }
             Spacer(
                 modifier = Modifier.height(16.dp)
             )
-
+            Text(
+                modifier= Modifier.weight(1f),
+                fontSize = 24.sp,
+                text ="Test"
+            )
         }
     }
 }
