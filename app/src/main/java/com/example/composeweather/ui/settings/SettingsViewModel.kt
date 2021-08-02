@@ -18,8 +18,8 @@ class SettingsViewModel @Inject constructor(
 
     //Gets settings as a Flow
 
-    val preferencesFlow = dataSoreManager.preferencesFlow
-    val locationFlow = dataSoreManager.locationFlow
+    private val preferencesFlow = dataSoreManager.preferencesFlow
+    private val locationFlow = dataSoreManager.locationFlow
 
     private val _prefs = MutableLiveData<WeatherPreferences>()
     val prefs : LiveData<WeatherPreferences> get() = _prefs
@@ -32,6 +32,12 @@ class SettingsViewModel @Inject constructor(
     fun onCelsiusSettingSelected(celsiusSetting : Boolean){
         viewModelScope.launch {
             dataSoreManager.updateCelsiusEnabled(celsiusSetting)
+            _prefs.value = preferencesFlow.first()
+        }
+    }
+    fun onLightThemeSettingSelected(lightThemeSetting : Boolean){
+        viewModelScope.launch {
+            dataSoreManager.updateLightThemeEnabled(lightThemeSetting)
             _prefs.value = preferencesFlow.first()
         }
     }

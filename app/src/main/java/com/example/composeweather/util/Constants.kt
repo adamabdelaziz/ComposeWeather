@@ -2,6 +2,8 @@ package com.example.composeweather.util
 
 import timber.log.Timber
 import java.lang.Math.floor
+import java.text.SimpleDateFormat
+import java.util.*
 import kotlin.math.pow
 import kotlin.math.roundToInt
 
@@ -13,13 +15,13 @@ const val FAHRENHEIT : String = "IMPERIAL"
 
 const val CELSIUS : String = "METRIC"
 
-const val NYC_LAT = 40.7131.toString()
+//const val NYC_LAT = 40.7131.toString()
+//
+//const val NYC_LON = (-74.0072).toString()
 
-const val NYC_LON = (-74.0072).toString()
+const val NYC_LAT = 42.3601.toString()
 
-//const val NYC_LAT = 42.3601.toString()
-
-//const val NYC_LON = 71.0589.toString()
+const val NYC_LON = 71.0589.toString()
 
 const val DEGREE_SYMBOL = "\u00B0"
 
@@ -73,13 +75,20 @@ fun getDayFromUnix(unixTime: Int, offset: Int): String {
     val result = div.rem(7)
 
     return when (result) {
-        0.0 -> "Thu."
-        1.0 -> "Fri."
-        2.0 -> "Sat."
-        3.0 -> "Sun."
-        4.0 -> "Mon."
-        5.0 -> "Tue."
-        6.0 -> "Wed."
+        0.0 -> "Thu"
+        1.0 -> "Fri"
+        2.0 -> "Sat"
+        3.0 -> "Sun"
+        4.0 -> "Mon"
+        5.0 -> "Tue"
+        6.0 -> "Wed"
         else -> "Nani??"
     }
+}
+
+fun getTimestampFromUnix(unixTime: Long, offset: Int) : String{
+    val simpleDateFormat = SimpleDateFormat("E hh a", Locale.ENGLISH)
+    return  simpleDateFormat.format(unixTime * 1000L)
+
+
 }

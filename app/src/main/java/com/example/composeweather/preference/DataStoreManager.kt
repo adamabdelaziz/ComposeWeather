@@ -29,6 +29,7 @@ class DataStoreManager @Inject constructor(@ApplicationContext appContext: Conte
     private object PreferencesKeys {
         val CELSIUS_ENABLED = booleanPreferencesKey("celsius")
         val LOCATION_ENABLED = booleanPreferencesKey("location")
+        val LIGHTTHEME_ENABLED = booleanPreferencesKey("lightTheme")
     }
 
     val preferencesFlow = settingsDataStore.data
@@ -43,7 +44,8 @@ class DataStoreManager @Inject constructor(@ApplicationContext appContext: Conte
         .map { preferences ->
             //Do this for each setting, then edit the WeatherPreferences object
             val celsiusEnabled = preferences[PreferencesKeys.CELSIUS_ENABLED] ?: false
-            WeatherPreferences(celsiusEnabled)
+            val lightThemeEnabled = preferences[PreferencesKeys.LIGHTTHEME_ENABLED] ?: false
+            WeatherPreferences(celsiusEnabled, lightThemeEnabled)
         }
     val locationFlow  = settingsDataStore.data
         .catch { exception ->
@@ -68,6 +70,12 @@ class DataStoreManager @Inject constructor(@ApplicationContext appContext: Conte
     suspend fun updateCelsiusEnabled(celsiusEnabled: Boolean) {
         settingsDataStore.edit { preferences ->
             preferences[PreferencesKeys.CELSIUS_ENABLED] = celsiusEnabled
+
+        }
+    }
+    suspend fun updateLightThemeEnabled(lightThemeEnabled: Boolean) {
+        settingsDataStore.edit { preferences ->
+            preferences[PreferencesKeys.LIGHTTHEME_ENABLED] = lightThemeEnabled
 
         }
     }

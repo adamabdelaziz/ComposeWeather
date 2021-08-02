@@ -52,13 +52,14 @@ class SettingsFragment : Fragment() {
 //                val prefFlows by prefFlow.collectAsState(initial = prefFlow.first())
 
                 if (prefs != null) {
+                    val lightTheme = prefs!!.lightTheme
                     Timber.d(prefs.toString() + " weatherPreferences not null")
-                    ComposeWeatherTheme {
+                    ComposeWeatherTheme(lightTheme) {
                         SettingsScreen(prefs!!)
                     }
                 } else {
                     Timber.d(prefs.toString() + " weatherPreferences null")
-                    ComposeWeatherTheme {
+                    ComposeWeatherTheme(false) {
                         LiveDataLoadingComponent()
                     }
                 }
@@ -159,6 +160,27 @@ class SettingsFragment : Fragment() {
                     thickness = 2.dp,
                     color = MaterialTheme.colors.secondary
                 )
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(8.dp),
+                    horizontalArrangement = Arrangement.Start,
+                    verticalAlignment = Alignment.CenterVertically,
+
+                    ) {
+                    Text(
+                        text = "Enable Light Theme",
+                        fontSize = 24.sp
+                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(8.dp),
+                        horizontalArrangement = Arrangement.End,
+                        verticalAlignment = Alignment.CenterVertically,
+
+                        ) {
+                        Switch(preferences.lightTheme, onCheckedChange = {
+                            settingsViewModel.onLightThemeSettingSelected(it)
+                        })
+                    }
+                }
 
             }
             Spacer(

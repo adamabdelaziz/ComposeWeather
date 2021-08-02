@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.composeweather.domain.model.Coord
 import com.example.composeweather.domain.model.OneCall
+import com.example.composeweather.domain.model.Weather
 import com.example.composeweather.preference.DataStoreManager
 import com.example.composeweather.preference.WeatherPreferences
 import com.example.composeweather.repository.WeatherRepository
@@ -15,6 +16,7 @@ import com.google.android.gms.location.FusedLocationProviderClient
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -25,15 +27,20 @@ class WeatherViewModel @Inject constructor(
     ViewModel() {
 
     private val preferencesFlow = dataSoreManager.preferencesFlow
-
+    private val locationFlow = dataSoreManager.locationFlow
 
     private val _oneCall = MutableLiveData<OneCall>()
     val oneCall: LiveData<OneCall> get() = _oneCall
 
+    private val _prefs = MutableLiveData<WeatherPreferences>()
+    val prefs : LiveData<WeatherPreferences> get() = _prefs
+
+    private val _location = MutableLiveData<Boolean>()
+    val location: LiveData<Boolean> get() = _location
+
     fun getWeather(lat: String, lon: String) {
         viewModelScope.launch {
             val weatherPreferences = preferencesFlow.first()
-
 
             if(weatherPreferences.celsiusEnabled){
                 val weather = repository.getOneCall(lat, lon, CELSIUS)
@@ -45,6 +52,30 @@ class WeatherViewModel @Inject constructor(
 
         }
     }
+
+    fun onLocationSettingsSelected(locationSetting: Boolean){
+        viewModelScope.launch {
+            dataSoreManager.updateLocationEnabled(locationSetting)
+            _location.value = locationSetting
+        }
+    }
+
+    fun getPrefs(){
+        viewModelScope.launch {
+            _location.value = locationFlow.first()
+            _prefs.value = preferencesFlow.first()
+        }
+    }
+
+    init{
+        Timber.d("WeatherViewModel init start")
+        getPrefs()
+        Timber.d("WeatherViewModel init end")
+    }
+
+
+
+
 }
 
 
