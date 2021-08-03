@@ -11,4 +11,8 @@
     <string name="humidity_icon_description">Humidity %</string>
     <string name="settings_title">Settings</string>
     <string name="thanks_bro">Thanks Bro</string>
+    <string name="morning">Morning</string>
+    <string name="day">Day</string>
+    <string name="evening">Evening</string>
+    <string name="night">Night</string>
 </resources>

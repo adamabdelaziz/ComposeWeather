@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
@@ -113,7 +114,11 @@ class SettingsFragment : Fragment() {
     @Composable
     fun TopRow() {
         TopAppBar(
-            title = { Text(stringResource(R.string.settings_title)) },
+            title = {
+                Text(text = stringResource(R.string.settings_title),
+                    style = MaterialTheme.typography.h4,
+                    modifier = Modifier.padding(0.dp,0.dp,0.dp,8.dp)
+                ) },
             backgroundColor = MaterialTheme.colors.primary,
         )
     }
@@ -121,10 +126,11 @@ class SettingsFragment : Fragment() {
     @Composable
     fun SettingsList(preferences: WeatherPreferences) {
         Column(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.fillMaxSize().background(MaterialTheme.colors.background),
             //verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            Timber.d(MaterialTheme.colors.toString() + " materialTheme")
             Timber.d(preferences.celsiusEnabled.toString())
             Spacer(
                 modifier = Modifier.height(16.dp)
@@ -178,14 +184,15 @@ class SettingsFragment : Fragment() {
                         ) {
                         Switch(preferences.lightTheme, onCheckedChange = {
                             settingsViewModel.onLightThemeSettingSelected(it)
+
                         })
                     }
                 }
+                Spacer(
+                    modifier = Modifier.height(16.dp)
+                )
 
             }
-            Spacer(
-                modifier = Modifier.height(16.dp)
-            )
             Text(
                 modifier= Modifier.weight(1f),
                 fontSize = 24.sp,

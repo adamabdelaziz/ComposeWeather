@@ -14,6 +14,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -35,20 +36,19 @@ import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import coil.compose.rememberImagePainter
 import com.example.composeweather.R
-import com.example.composeweather.domain.model.*
-import com.example.composeweather.ui.settings.SettingsViewModel
+import com.example.composeweather.domain.model.Daily
+import com.example.composeweather.domain.model.OneCall
+import com.example.composeweather.domain.model.Rain
+import com.example.composeweather.domain.model.Snow
 import com.example.composeweather.ui.theme.ComposeWeatherTheme
 import com.example.composeweather.util.*
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
 import timber.log.Timber
 import kotlin.math.roundToInt
 
@@ -68,7 +68,7 @@ class WeatherFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
 
         Timber.d("onCreate called in WeatherFragment")
-        //viewModel.getTheme()
+
         geocoder = Geocoder(context)
 
         requestPermissionLauncher =
@@ -187,10 +187,12 @@ class WeatherFragment : Fragment() {
 
         SetStatusBar()
         Column(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.fillMaxSize().background(MaterialTheme.colors.background),
             //verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
+            horizontalAlignment = Alignment.CenterHorizontally,
+
+
+            ) {
             TopRow(title)
             CurrentCard(weatherState)
             DailyCard(weatherState)
@@ -219,17 +221,29 @@ class WeatherFragment : Fragment() {
     @Composable
     fun TopRow(cityName: String) {
         TopAppBar(
-            title = { Text(cityName) },
+            title = {
+                Text(
+                    text = cityName,
+                    style = MaterialTheme.typography.h4,
+                    modifier = Modifier.padding(0.dp,0.dp,0.dp,8.dp)
+                )
+            },
             backgroundColor = MaterialTheme.colors.primary,
             actions = {
                 IconButton(onClick = {
                     refreshLocation()
                     Toast.makeText(context, "Updating..", Toast.LENGTH_SHORT).show()
                 }) {
-                    Icon(Icons.Filled.LocationOn, contentDescription = "Refresh Current Location")
+                    Icon(
+                        Icons.Filled.LocationOn,
+                        contentDescription = "Refresh Current Location",
+                        tint = MaterialTheme.colors.onSurface
+                    )
                 }
                 IconButton(onClick = { goToSettings() }) {
-                    Icon(Icons.Filled.Settings, contentDescription = "Go to Settings Menu")
+                    Icon(Icons.Filled.Settings,
+                        contentDescription = "Go to Settings Menu",
+                        tint = MaterialTheme.colors.onSurface)
                 }
             },
         )
@@ -286,13 +300,15 @@ class WeatherFragment : Fragment() {
                     ) {
                     Text(
                         text = getDayFromUnix(day.dt, offset),
-                        fontSize = 24.sp,
+                        style = MaterialTheme.typography.h4,
+                        modifier = Modifier.padding(8.dp, 4.dp),
+                        //fontSize = 24.sp,
 
                         )
                     Image(
                         painter = rememberImagePainter(icon),
                         contentDescription = stringResource(R.string.rain_icon_description),
-                        modifier = Modifier.size(64.dp)
+                        modifier = Modifier.size(64.dp).padding(8.dp,4.dp)
                     )
                     Row(
                         modifier = Modifier.fillMaxWidth().padding(8.dp),
@@ -301,14 +317,15 @@ class WeatherFragment : Fragment() {
                     )
                     {
                         Text(
+                            style = MaterialTheme.typography.h4,
                             text = "$low$DEGREE_SYMBOL",
                             modifier = Modifier.padding(8.dp, 4.dp),
-                            fontSize = 18.sp
+
                         )
                         Text(
+                            style = MaterialTheme.typography.h4,
                             text = "$high$DEGREE_SYMBOL",
                             modifier = Modifier.padding(8.dp, 4.dp),
-                            fontSize = 18.sp
                         )
                     }
                 }
@@ -325,14 +342,16 @@ class WeatherFragment : Fragment() {
                         )
                         {
                             Text(
+                                style = MaterialTheme.typography.h5,
                                 text = "$mornTemp$DEGREE_SYMBOL",
                                 modifier = Modifier,
-                                fontSize = 18.sp
+
                             )
                             Text(
-                                text = "Morning",
+                                style = MaterialTheme.typography.h5,
+                                text = stringResource(R.string.morning),
                                 modifier = Modifier,
-                                fontSize = 18.sp
+
                             )
                         }
                         Column(
@@ -340,14 +359,12 @@ class WeatherFragment : Fragment() {
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Text(
+                                style = MaterialTheme.typography.h5,
                                 text = "$dayTemp$DEGREE_SYMBOL",
-                                modifier = Modifier,
-                                fontSize = 18.sp
                             )
                             Text(
-                                text = "Day",
-                                modifier = Modifier,
-                                fontSize = 18.sp
+                                style = MaterialTheme.typography.h5,
+                                text = stringResource(R.string.day),
                             )
                         }
                         Column(
@@ -355,14 +372,12 @@ class WeatherFragment : Fragment() {
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Text(
+                                style = MaterialTheme.typography.h5,
                                 text = "$eveTemp$DEGREE_SYMBOL",
-                                modifier = Modifier,
-                                fontSize = 18.sp
                             )
                             Text(
-                                text = "Evening",
-                                modifier = Modifier,
-                                fontSize = 18.sp
+                                style = MaterialTheme.typography.h5,
+                                text = stringResource(R.string.evening),
                             )
                         }
                         Column(
@@ -370,14 +385,12 @@ class WeatherFragment : Fragment() {
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Text(
+                                style = MaterialTheme.typography.h5,
                                 text = "$nightTemp$DEGREE_SYMBOL",
-                                modifier = Modifier,
-                                fontSize = 18.sp
                             )
                             Text(
-                                text = "Night",
-                                modifier = Modifier,
-                                fontSize = 18.sp
+                                style = MaterialTheme.typography.h5,
+                                text = stringResource(R.string.night),
                             )
                         }
 
@@ -406,9 +419,9 @@ class WeatherFragment : Fragment() {
                                     }).size(64.dp)
                                 )
                                 Text(
+                                    style = MaterialTheme.typography.h5,
                                     text = "${toInches(rain)} in.",
                                     modifier = Modifier.padding(4.dp),
-                                    fontSize = 16.sp
                                 )
                             }
                         }
@@ -430,9 +443,10 @@ class WeatherFragment : Fragment() {
                                     }).size(64.dp)
                                 )
                                 Text(
+                                    style = MaterialTheme.typography.h5,
                                     text = "${toInches(snow)} in.",
                                     modifier = Modifier.padding(4.dp),
-                                    fontSize = 16.sp
+
                                 )
                             }
                         }
@@ -454,9 +468,9 @@ class WeatherFragment : Fragment() {
                                     }).size(64.dp)
                                 )
                                 Text(
+                                    style = MaterialTheme.typography.h5,
                                     text = "${pop.roundTo(2)} %",
                                     modifier = Modifier.padding(4.dp),
-                                    fontSize = 16.sp
                                 )
                             }
                         }
@@ -478,7 +492,7 @@ class WeatherFragment : Fragment() {
         val current = weatherState.current
         val alerts = weatherState.alerts
         val hourly = weatherState.hourly
-        val offset =weatherState.offset
+        val offset = weatherState.offset
 
         var openDialog by remember { mutableStateOf(false) }
         var expanded by remember { mutableStateOf(false) }
@@ -553,7 +567,7 @@ class WeatherFragment : Fragment() {
 //                expanded = !expanded
 //                //Timber.d(expanded.toString())
 //            }
-      ){
+        ) {
             Column(
                 //Column modifiers go here
 
@@ -568,7 +582,7 @@ class WeatherFragment : Fragment() {
                     Text(
                         text = "Feels like $feelsLike$DEGREE_SYMBOL",
                         modifier = Modifier.align(CenterHorizontally).padding(8.dp),
-                        fontSize = 24.sp
+                        fontSize = 32.sp
                     )
                 }
                 Row(
@@ -591,9 +605,9 @@ class WeatherFragment : Fragment() {
                             }).size(64.dp)
                         )
                         Text(
+
                             text = "${toInches(rain)} in.",
                             modifier = Modifier.padding(4.dp),
-                            fontSize = 16.sp
                         )
                     }
                     if (snow > 0.0) {
@@ -609,9 +623,10 @@ class WeatherFragment : Fragment() {
                             }).size(64.dp)
                         )
                         Text(
+                            style = MaterialTheme.typography.h5,
                             text = "${toInches(snow)} in.",
                             modifier = Modifier.padding(4.dp),
-                            fontSize = 16.sp
+
                         )
                     }
                     when (clouds.toInt()) {
@@ -673,9 +688,9 @@ class WeatherFragment : Fragment() {
                         }).size(64.dp)
                     )
                     Text(
+                        style = MaterialTheme.typography.h5,
                         text = "$humidity%",
                         modifier = Modifier.padding(8.dp),
-                        fontSize = 16.sp
                     )
                     //Except this isnt always true and its crashed because it was null when there were no alerts soooo
                     if (alerts !== null) {
