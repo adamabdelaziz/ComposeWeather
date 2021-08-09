@@ -3,7 +3,7 @@ package com.example.composeweather.domain.model
 data class Daily(
     val clouds: Int,
     val dew_point: Double,
-    val dt: Int,
+    val dt: Double,
     val feels_like: FeelsLike,
     val humidity: Int,
     val pop: Double,

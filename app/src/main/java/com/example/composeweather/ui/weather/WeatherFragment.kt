@@ -18,6 +18,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
@@ -39,10 +40,7 @@ import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import coil.compose.rememberImagePainter
 import com.example.composeweather.R
-import com.example.composeweather.domain.model.Daily
-import com.example.composeweather.domain.model.OneCall
-import com.example.composeweather.domain.model.Rain
-import com.example.composeweather.domain.model.Snow
+import com.example.composeweather.domain.model.*
 import com.example.composeweather.ui.theme.ComposeWeatherTheme
 import com.example.composeweather.util.*
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
@@ -195,6 +193,7 @@ class WeatherFragment : Fragment() {
             ) {
             TopRow(title)
             CurrentCard(weatherState)
+            HourlyCard(weatherState)
             DailyCard(weatherState)
             Spacer(
                 modifier = Modifier.height(16.dp)
@@ -264,7 +263,7 @@ class WeatherFragment : Fragment() {
 
     //@TODO:Maybe some sort of long press somewhere that sets all expands to false?
     @Composable
-    private fun DailyRow(day: Daily, offset: Int) {
+    private fun DailyRow(day: Daily, offset: Double) {
         var expanded by remember { mutableStateOf(false) }
 
         val high = day.temp.max.roundToInt().toString()
@@ -502,6 +501,7 @@ class WeatherFragment : Fragment() {
         val humidity = current.humidity
         val clouds = current.clouds
         val windSpeed = current.wind_speed
+        val weather = current.weather.first()
 
         val rainObject = current.rain ?: Rain(0.0, 0.0)
         val snowObject = current.snow ?: Snow(0.0, 0.0)
@@ -560,16 +560,13 @@ class WeatherFragment : Fragment() {
 //                })
         }
 
-        Card(
-            modifier = Modifier.fillMaxWidth().padding(16.dp),
-            shape = RoundedCornerShape(20.dp),
-//            onClick = {
-//                expanded = !expanded
-//                //Timber.d(expanded.toString())
-//            }
-        ) {
+//        Card(
+//            modifier = Modifier.fillMaxWidth().padding(16.dp),
+//            shape = RoundedCornerShape(20.dp),
+//        ) {
             Column(
                 //Column modifiers go here
+                modifier = Modifier.fillMaxWidth().padding(16.dp),
 
             ) {
                 Text(
@@ -578,13 +575,13 @@ class WeatherFragment : Fragment() {
                     fontSize = 64.sp,
 
                     )
-                if (temp != feelsLike) {
-                    Text(
-                        text = "Feels like $feelsLike$DEGREE_SYMBOL",
-                        modifier = Modifier.align(CenterHorizontally).padding(8.dp),
-                        fontSize = 32.sp
-                    )
-                }
+//                if (temp != feelsLike) {
+//                    Text(
+//                        text = "Feels like $feelsLike$DEGREE_SYMBOL",
+//                        modifier = Modifier.align(CenterHorizontally).padding(8.dp),
+//                        fontSize = 32.sp
+//                    )
+//                }
                 Row(
                     //Row Modifiers go here
                     modifier = Modifier.align(CenterHorizontally),
@@ -605,7 +602,7 @@ class WeatherFragment : Fragment() {
                             }).size(64.dp)
                         )
                         Text(
-
+                            style = MaterialTheme.typography.h5,
                             text = "${toInches(rain)} in.",
                             modifier = Modifier.padding(4.dp),
                         )
@@ -672,9 +669,9 @@ class WeatherFragment : Fragment() {
                         }
                     }
                     Text(
+                        style = MaterialTheme.typography.h5,
                         text = "$clouds%",
                         modifier = Modifier.padding(8.dp),
-                        fontSize = 16.sp
                     )
                     Image(
                         painter = rememberImagePainter(R.drawable.humidity200xx),
@@ -714,35 +711,44 @@ class WeatherFragment : Fragment() {
             //End of Card
         }
 
-    }
 
 
-//    @Composable
-//    fun HourlyRow(hour: Hourly, offset: Int) {
-//        val dt = hour.dt
-//
-//        val hourTime = getTimestampFromUnix(dt.toLong(),offset)
-//        Timber.d(hourTime + " hourTime")
-//
-//        val rain = hour.rain ?: Rain(0.0, 0.0)
-//        val oneHour = rain.oneHour
-//
-//        val temp = hour.temp
-//        Row(
-//            modifier = Modifier,
-//            horizontalArrangement = Arrangement.Start,
-//            verticalAlignment = Alignment.CenterVertically
-//        ) {
-//            Text(
-//                text = hourTime,
-//                modifier = Modifier.padding(8.dp),
-//                fontSize = 16.sp
-//            )
-//            Text(
-//                text = "$temp",
-//                modifier = Modifier.padding(8.dp),
-//                fontSize = 16.sp
-//            )
+    @Composable
+    fun HourlyColumn(hour: Hourly, offset: Double) {
+        val dt = hour.dt
+
+        val hourTime = getTimestampFromUnix(dt,offset)
+        Timber.d(hourTime + " hourTime")
+
+        val rain = hour.rain ?: Rain(0.0, 0.0)
+        val oneHour = rain.oneHour
+        val weather = hour.weather.first()
+        val icon = getIconLarge(weather.icon)
+        val temp = hour.temp.roundToInt()
+
+        Column(
+            modifier = Modifier
+                .padding(start = 8.dp, top = 0.dp, bottom = 0.dp, end = 8.dp),
+            verticalArrangement = Arrangement.Top,
+            horizontalAlignment = Alignment.CenterHorizontally,
+
+        ) {
+            Text(
+                style = MaterialTheme.typography.h5,
+                text = hourTime,
+                modifier = Modifier.padding(8.dp),
+            )
+            Image(
+                painter = rememberImagePainter(icon),
+                contentDescription = stringResource(R.string.rain_icon_description),
+                modifier = Modifier.size(64.dp).padding(8.dp,4.dp)
+            )
+            Text(
+                style = MaterialTheme.typography.h5,
+                text = "$temp$DEGREE_SYMBOL",
+                modifier = Modifier.padding(8.dp),
+
+            )
 //            if(oneHour > 0.0){
 //                Text(
 //                    text = "$oneHour",
@@ -750,35 +756,40 @@ class WeatherFragment : Fragment() {
 //                    fontSize = 16.sp
 //                )
 //            }
-//        }
-//    }
-//
-//
-//    @Composable
-//    fun Hourly(hourly: List<Hourly>, offset: Int) {
-//        LazyColumn(modifier = Modifier.fillMaxWidth()) {
-//            items(hourly) { hour ->
-//                val dt = hour.dt
-//                val timestamp = getTimestampFromUnix(dt.toLong(),offset)
-//                val timestampDay : String =timestamp.substring(0,3)
-//                val dayOfWeek :String = getDayFromUnix(dt,offset)
-//                Timber.d(timestamp + " timestamp")
-//                Timber.d(timestampDay + " timeStampDay")
-//                Timber.d(dayOfWeek + " dayOfWeek")
-//
-//                if(timestampDay == dayOfWeek)
-//                {
-//                    HourlyRow(hour, offset)
-//                    Timber.d(timestampDay , dayOfWeek + " are same day")
-//
-//                }else{
-//
-//                    Timber.d("Hour is from future day, dont make a row for it")
-//                }
-//
-//            }
-//        }
-//    }
+        }
+    }
+
+
+    @Composable
+    fun HourlyCard(weatherState: OneCall) {
+        val hourly = weatherState.hourly
+        val offset = weatherState.offset
+//        Card(
+//            modifier = Modifier.fillMaxWidth()
+//                .padding(start = 16.dp, end = 16.dp, bottom = 8.dp, top = 8.dp)
+//                .animateContentSize(),
+//            shape = RoundedCornerShape(20.dp),
+//        ) {
+            LazyRow(
+                modifier = Modifier.fillMaxWidth()
+                    .padding(start = 8.dp, end = 8.dp, bottom = 8.dp, top = 8.dp),
+
+            ) {
+                items(hourly) { hour ->
+                    val dt = hour.dt
+                    val timestamp = getTimestampFromUnix(dt, offset)
+                    val timestampDay: String = timestamp.substring(0, 3)
+                    val dayOfWeek: String = getDayFromUnix(dt, offset)
+                    Timber.d(timestamp.toString() +"dtStamp")
+
+                    HourlyColumn(hour, offset)
+
+
+                }
+            }
+        }
+
+
 
     @Composable
     fun LiveDataLoadingComponent() {

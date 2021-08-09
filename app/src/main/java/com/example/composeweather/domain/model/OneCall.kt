@@ -20,7 +20,7 @@ data class OneCall(
     val alerts : List<Alert>,
     val timezone: String,
     @SerializedName("timezone_offset")
-    val offset: Int
+    val offset: Double
 ){
     @PrimaryKey(autoGenerate = true)
     var id: Long? = null

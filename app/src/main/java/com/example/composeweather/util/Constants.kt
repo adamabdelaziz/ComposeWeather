@@ -11,9 +11,9 @@ const val API_KEY = "e8e98e12bdbf52acbf23acc3257c613a"
 
 const val BASE_URL = "https://api.openweathermap.org/data/2.5/"
 
-const val FAHRENHEIT : String = "IMPERIAL"
+const val FAHRENHEIT: String = "IMPERIAL"
 
-const val CELSIUS : String = "METRIC"
+const val CELSIUS: String = "METRIC"
 
 //const val NYC_LAT = 40.7131.toString()
 //
@@ -58,9 +58,10 @@ fun getIconSmall(iconId: String): String {
 fun getIconLarge(iconId: String): String {
     return "https://openweathermap.org/img/wn/$iconId@4x.png"
 }
+
 //mm to inches for rainfall/snowfall
 fun toInches(measurement: Double): String {
-    return measurement.times(0.0394).toString().substring(0,4)
+    return measurement.times(0.0394).toString().substring(0, 4)
 }
 
 fun Double.roundTo(numFractionDigits: Int): Double {
@@ -68,8 +69,9 @@ fun Double.roundTo(numFractionDigits: Int): Double {
 
     return (this * factor).roundToInt() / factor
 }
+
 // Gets the day of the week from the UnixTime and Offset
-fun getDayFromUnix(unixTime: Int, offset: Int): String {
+fun getDayFromUnix(unixTime: Double, offset: Double): String {
     val time = unixTime - offset
     val div = floor(time.div(SECONDS_IN_A_DAY).toDouble())
     val result = div.rem(7)
@@ -86,9 +88,26 @@ fun getDayFromUnix(unixTime: Int, offset: Int): String {
     }
 }
 
-fun getTimestampFromUnix(unixTime: Long, offset: Int) : String{
-    val simpleDateFormat = SimpleDateFormat("E hh a", Locale.ENGLISH)
-    return  simpleDateFormat.format(unixTime * 1000L)
+fun getTimestampFromUnix(unixTime: Double, offset: Double): String {
+    val time = unixTime.plus(offset)
+    val simpleDateFormat = SimpleDateFormat("hh a", Locale.ENGLISH)
+
+    val string = java.time.format.DateTimeFormatter.ISO_INSTANT
+        .format(java.time.Instant.ofEpochSecond(time.toLong()))
+
+    Timber.d(string + "kotlinNew")
+
+    //val newFormat = simpleDateFormat.format(java.time.Instant.ofEpochSecond(time.toLong()))
+    //Timber.d(newFormat + "kotlinNew")
+    //return string
+    var timeStamp = simpleDateFormat.format(time * 1000L)
+
+    return if(timeStamp.startsWith("0")){
+        timeStamp = timeStamp.substring(1)
+        timeStamp
+    }
+    else
+        timeStamp
 
 
 }
