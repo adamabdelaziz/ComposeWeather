@@ -1,5 +1,6 @@
 package com.example.composeweather.ui.theme
 
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Typography
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
@@ -32,6 +33,12 @@ val Typography = Typography(
         letterSpacing = 0.sp,
         color = Black
     ),
+    subtitle2 = TextStyle(
+        fontWeight = FontWeight.Medium,
+        fontSize = 14.sp,
+        letterSpacing = 0.1.sp,
+        color= secondaryLight
+    ),
 )
 
 val TypographyDark = Typography(
@@ -57,6 +64,12 @@ val TypographyDark = Typography(
         fontSize = 24.sp,
         letterSpacing = 0.sp,
         color = White
+    ),
+    subtitle2 = TextStyle(
+        fontWeight = FontWeight.Medium,
+        fontSize = 14.sp,
+        letterSpacing = 0.1.sp,
+        color = secondaryDark
     ),
 
     )

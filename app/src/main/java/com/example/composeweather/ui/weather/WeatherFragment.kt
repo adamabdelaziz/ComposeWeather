@@ -723,21 +723,35 @@ class WeatherFragment : Fragment() {
         val rain = hour.rain ?: Rain(0.0, 0.0)
         val oneHour = rain.oneHour
         val weather = hour.weather.first()
+        val pop = hour.pop.times(100).roundToInt()
         val icon = getIconLarge(weather.icon)
         val temp = hour.temp.roundToInt()
 
         Column(
             modifier = Modifier
                 .padding(start = 8.dp, top = 0.dp, bottom = 0.dp, end = 8.dp),
-            verticalArrangement = Arrangement.Top,
+            verticalArrangement = Arrangement.SpaceEvenly,
             horizontalAlignment = Alignment.CenterHorizontally,
 
         ) {
             Text(
                 style = MaterialTheme.typography.h5,
                 text = hourTime,
-                modifier = Modifier.padding(8.dp),
+                //modifier = Modifier.padding(8.dp),
             )
+            if(pop > 0.0){
+                Text(
+                    style = MaterialTheme.typography.subtitle2,
+                    text = "$pop%",
+                    //modifier = Modifier.padding(8.dp),
+                )
+            }else{
+                Text(
+                    style = MaterialTheme.typography.subtitle2,
+                    text = "",
+                    //modifier = Modifier.padding(8.dp),
+                )
+            }
             Image(
                 painter = rememberImagePainter(icon),
                 contentDescription = stringResource(R.string.rain_icon_description),
