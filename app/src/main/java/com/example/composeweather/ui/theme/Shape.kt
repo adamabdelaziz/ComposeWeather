@@ -2,6 +2,7 @@ package com.example.composeweather.ui.theme
 
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Shapes
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.unit.dp
 
 val Shapes = Shapes(

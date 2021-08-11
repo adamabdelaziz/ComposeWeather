@@ -14,7 +14,7 @@ val Grey200 = Color(0xFFEEEEEE)
 val Red =Color(0xFFFF0000)
 val Teal50 = Color(0xFFE3FFFF)
 val SomeRed = Color(0xFF980000)
-val OldLightPrimary = Color(0xFFFFE3E3)
+
 
 //Dark Theme Colors
 val surfaceDark = Color(0xFF393E46)
@@ -25,9 +25,13 @@ val secondaryDark = Teal200
 
 
 //Light Theme Colors
-val backgroundLight = Grey200
-val surfaceLight = Color(0xFFFFFFFF)
-val primaryLight = OldLightPrimary
+val oldLightPrimary = Color(0xFFFFE3E3)
+val oldLightPrimaryTint = Color(0xFFFFE3E3)
+val OldSurfaceLight = Color(0xFFFFFFFF)
+
+val backgroundLight = White
+val surfaceLight = Grey200
+val primaryLight = oldLightPrimary
 val primaryVariantLight = Color(0xFFD81B5F)
 val secondaryLight = SomeRed
 

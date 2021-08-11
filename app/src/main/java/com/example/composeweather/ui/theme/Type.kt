@@ -35,7 +35,7 @@ val Typography = Typography(
     ),
     subtitle2 = TextStyle(
         fontWeight = FontWeight.Medium,
-        fontSize = 14.sp,
+        fontSize = 18.sp,
         letterSpacing = 0.1.sp,
         color= secondaryLight
     ),
@@ -67,7 +67,7 @@ val TypographyDark = Typography(
     ),
     subtitle2 = TextStyle(
         fontWeight = FontWeight.Medium,
-        fontSize = 14.sp,
+        fontSize = 18.sp,
         letterSpacing = 0.1.sp,
         color = secondaryDark
     ),

@@ -25,6 +25,7 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.rounded.Warning
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
@@ -224,7 +225,7 @@ class WeatherFragment : Fragment() {
                 Text(
                     text = cityName,
                     style = MaterialTheme.typography.h4,
-                    modifier = Modifier.padding(0.dp,0.dp,0.dp,8.dp)
+                    modifier = Modifier.padding(0.dp, 0.dp, 0.dp, 8.dp)
                 )
             },
             backgroundColor = MaterialTheme.colors.primary,
@@ -240,9 +241,11 @@ class WeatherFragment : Fragment() {
                     )
                 }
                 IconButton(onClick = { goToSettings() }) {
-                    Icon(Icons.Filled.Settings,
+                    Icon(
+                        Icons.Filled.Settings,
                         contentDescription = "Go to Settings Menu",
-                        tint = MaterialTheme.colors.onSurface)
+                        tint = MaterialTheme.colors.onSurface
+                    )
                 }
             },
         )
@@ -303,11 +306,11 @@ class WeatherFragment : Fragment() {
                         modifier = Modifier.padding(8.dp, 4.dp),
                         //fontSize = 24.sp,
 
-                        )
+                    )
                     Image(
                         painter = rememberImagePainter(icon),
                         contentDescription = stringResource(R.string.rain_icon_description),
-                        modifier = Modifier.size(64.dp).padding(8.dp,4.dp)
+                        modifier = Modifier.size(64.dp).padding(8.dp, 4.dp)
                     )
                     Row(
                         modifier = Modifier.fillMaxWidth().padding(8.dp),
@@ -320,7 +323,8 @@ class WeatherFragment : Fragment() {
                             text = "$low$DEGREE_SYMBOL",
                             modifier = Modifier.padding(8.dp, 4.dp),
 
-                        )
+
+                            )
                         Text(
                             style = MaterialTheme.typography.h4,
                             text = "$high$DEGREE_SYMBOL",
@@ -345,13 +349,13 @@ class WeatherFragment : Fragment() {
                                 text = "$mornTemp$DEGREE_SYMBOL",
                                 modifier = Modifier,
 
-                            )
+                                )
                             Text(
                                 style = MaterialTheme.typography.h5,
                                 text = stringResource(R.string.morning),
                                 modifier = Modifier,
 
-                            )
+                                )
                         }
                         Column(
                             modifier = Modifier.padding(8.dp, 4.dp).weight(1.0f),
@@ -446,7 +450,7 @@ class WeatherFragment : Fragment() {
                                     text = "${toInches(snow)} in.",
                                     modifier = Modifier.padding(4.dp),
 
-                                )
+                                    )
                             }
                         }
                         if (pop > 0.0) {
@@ -481,74 +485,88 @@ class WeatherFragment : Fragment() {
 
     }
 
-    /**
-     * Maybe make this expandable as well? And display hourly information here? Probably wont be very useful if it shows hours that already past though
-     * Also add alerts here maybe as a clickable dialog or something
-     */
     @Composable
-    fun CurrentCard(weatherState: OneCall) {
+    fun Alert(alerts: List<Alert>) {
+        LazyColumn() {
+            items(alerts) { alert ->
+                Text(
+                    text = alert.event,
+                    fontSize = 32.sp
+                )
+                Text(
+                    text = alert.description,
+                    fontSize = 16.sp
+                )
+                Spacer(modifier = Modifier.size(8.dp))
+            }
+        }
 
-        val current = weatherState.current
-        val alerts = weatherState.alerts
-        val hourly = weatherState.hourly
-        val offset = weatherState.offset
+    }
+        /**
+         * Maybe make this expandable as well? And display hourly information here? Probably wont be very useful if it shows hours that already past though
+         * Also add alerts here maybe as a clickable dialog or something
+         */
+        @Composable
+        fun CurrentCard(weatherState: OneCall) {
 
-        var openDialog by remember { mutableStateOf(false) }
-        var expanded by remember { mutableStateOf(false) }
+            val current = weatherState.current
+            val alerts = weatherState.alerts
+            val hourly = weatherState.hourly
+            val offset = weatherState.offset
 
-        val temp = current.temp.roundToInt()
-        val feelsLike = current.feels_like.roundToInt()
-        val humidity = current.humidity
-        val clouds = current.clouds
-        val windSpeed = current.wind_speed
-        val weather = current.weather.first()
+            var openDialog by remember { mutableStateOf(false) }
+            var expanded by remember { mutableStateOf(false) }
 
-        val rainObject = current.rain ?: Rain(0.0, 0.0)
-        val snowObject = current.snow ?: Snow(0.0, 0.0)
+            val temp = current.temp.roundToInt()
+            val feelsLike = current.feels_like.roundToInt()
+            val humidity = current.humidity
+            val clouds = current.clouds
+            val windSpeed = current.wind_speed
+            val weather = current.weather.first()
 
-        val rain = rainObject.oneHour
-        val snow = snowObject.oneHour
+            val rainObject = current.rain ?: Rain(0.0, 0.0)
+            val snowObject = current.snow ?: Snow(0.0, 0.0)
 
-        Timber.d("$rain + currentCardRain")
-        val timezone = weatherState.timezone
+            val rain = rainObject.oneHour
+            val snow = snowObject.oneHour
+
+            Timber.d("$rain + currentCardRain")
+            val timezone = weatherState.timezone
 
 
-        if (openDialog) {
+            if (openDialog) {
 
-            AlertDialog(
-                onDismissRequest = {
-                    // Dismiss the dialog when the user clicks outside the dialog or on the back
-                    // button. If you want to disable that functionality, simply use an empty
-                    // onCloseRequest.
-                    openDialog = false
-                },
-                text = {
-                    Column() {
-                        for (alert in alerts) {
-                            Text(
-                                text = alert.event,
-                                fontSize = 32.sp
-                            )
+                AlertDialog(
+                    onDismissRequest = {
+                        // Dismiss the dialog when the user clicks outside the dialog or on the back
+                        // button. If you want to disable that functionality, simply use an empty
+                        // onCloseRequest.
+                        openDialog = false
+                    },
+                    text = {Alert(alerts)},
+//                    text = { Column() {
+//                        for (alert in alerts) {
+//                            Text(
+//                                text = alert.event,
+//                                fontSize = 32.sp
+//                            )
+//
+//                            Text(
+//                                text = alert.description,
+//                                fontSize = 16.sp
+//                            )
+//                            Spacer(modifier = Modifier.size(8.dp))
+//                        }
+ //                   }},
+                    confirmButton = {
+                        Button(
 
-                            Text(
-                                text = alert.description,
-                                fontSize = 16.sp
-                            )
-                            Spacer(modifier = Modifier.size(8.dp))
+                            onClick = {
+                                openDialog = false
+                            }) {
+                            Text(stringResource(R.string.thanks_bro))
                         }
-                    }
-
-
-                },
-                confirmButton = {
-                    Button(
-
-                        onClick = {
-                            openDialog = false
-                        }) {
-                        Text(stringResource(R.string.thanks_bro))
-                    }
-                })
+                    })
 //                dismissButton = {
 //                    Button(
 //
@@ -558,7 +576,7 @@ class WeatherFragment : Fragment() {
 //                        Text("D")
 //                    }
 //                })
-        }
+            }
 
 //        Card(
 //            modifier = Modifier.fillMaxWidth().padding(16.dp),
@@ -568,7 +586,7 @@ class WeatherFragment : Fragment() {
                 //Column modifiers go here
                 modifier = Modifier.fillMaxWidth().padding(16.dp),
 
-            ) {
+                ) {
                 Text(
                     text = "$temp$DEGREE_SYMBOL",
                     modifier = Modifier.align(CenterHorizontally).padding(8.dp),
@@ -624,7 +642,7 @@ class WeatherFragment : Fragment() {
                             text = "${toInches(snow)} in.",
                             modifier = Modifier.padding(4.dp),
 
-                        )
+                            )
                     }
                     when (clouds.toInt()) {
                         in 0..25 -> {
@@ -691,13 +709,21 @@ class WeatherFragment : Fragment() {
                     )
                     //Except this isnt always true and its crashed because it was null when there were no alerts soooo
                     if (alerts !== null) {
-                        Image(
-                            painter = rememberImagePainter(R.drawable.outline_warning_white_24),
-                            contentDescription = stringResource(R.string.humidity_icon_description),
-                            modifier = Modifier.clickable(onClick = {
-                                openDialog = true
-                            }).size(40.dp)
+                        Icon(
+                            Icons.Rounded.Warning,
+                            tint = MaterialTheme.colors.secondary,
+                            contentDescription = "warning",
+                            modifier = Modifier.clickable { openDialog = true }.size(64.dp)
+                                .padding(8.dp),
                         )
+
+//                        Image(
+//                            painter = rememberImagePainter(R.drawable.outline_warning_white_24),
+//                            contentDescription = stringResource(R.string.humidity_icon_description),
+//                            modifier = Modifier.clickable(onClick = {
+//                                openDialog = true
+//                            }).size(40.dp)
+//                        )
 
                     }
 
@@ -712,57 +738,57 @@ class WeatherFragment : Fragment() {
         }
 
 
+        @Composable
+        fun HourlyColumn(hour: Hourly, offset: Double) {
+            val dt = hour.dt
 
-    @Composable
-    fun HourlyColumn(hour: Hourly, offset: Double) {
-        val dt = hour.dt
+            val hourTime = getTimestampFromUnix(dt, offset)
+            Timber.d(hourTime + " hourTime")
 
-        val hourTime = getTimestampFromUnix(dt,offset)
-        Timber.d(hourTime + " hourTime")
+            val rain = hour.rain ?: Rain(0.0, 0.0)
+            val oneHour = rain.oneHour
+            val weather = hour.weather.first()
+            val pop = hour.pop.times(100).roundToInt()
+            val icon = getIconLarge(weather.icon)
+            val temp = hour.temp.roundToInt()
 
-        val rain = hour.rain ?: Rain(0.0, 0.0)
-        val oneHour = rain.oneHour
-        val weather = hour.weather.first()
-        val pop = hour.pop.times(100).roundToInt()
-        val icon = getIconLarge(weather.icon)
-        val temp = hour.temp.roundToInt()
+            Column(
+                modifier = Modifier
+                    .padding(start = 8.dp, top = 0.dp, bottom = 0.dp, end = 8.dp),
+                verticalArrangement = Arrangement.SpaceEvenly,
+                horizontalAlignment = Alignment.CenterHorizontally,
 
-        Column(
-            modifier = Modifier
-                .padding(start = 8.dp, top = 0.dp, bottom = 0.dp, end = 8.dp),
-            verticalArrangement = Arrangement.SpaceEvenly,
-            horizontalAlignment = Alignment.CenterHorizontally,
-
-        ) {
-            Text(
-                style = MaterialTheme.typography.h5,
-                text = hourTime,
-                //modifier = Modifier.padding(8.dp),
-            )
-            if(pop > 0.0){
+                ) {
                 Text(
-                    style = MaterialTheme.typography.subtitle2,
-                    text = "$pop%",
+                    style = MaterialTheme.typography.h5,
+                    text = hourTime,
                     //modifier = Modifier.padding(8.dp),
                 )
-            }else{
-                Text(
-                    style = MaterialTheme.typography.subtitle2,
-                    text = "",
-                    //modifier = Modifier.padding(8.dp),
+                if (pop > 0.0) {
+                    Text(
+                        style = MaterialTheme.typography.subtitle2,
+                        text = "$pop%",
+                        //modifier = Modifier.padding(8.dp),
+                    )
+                } else {
+                    Text(
+                        style = MaterialTheme.typography.subtitle2,
+                        text = "",
+                        //modifier = Modifier.padding(8.dp),
+                    )
+                }
+                Image(
+                    painter = rememberImagePainter(icon),
+                    contentDescription = stringResource(R.string.rain_icon_description),
+                    modifier = Modifier.size(96.dp)
+                    //.padding(8.dp,4.dp)
                 )
-            }
-            Image(
-                painter = rememberImagePainter(icon),
-                contentDescription = stringResource(R.string.rain_icon_description),
-                modifier = Modifier.size(64.dp).padding(8.dp,4.dp)
-            )
-            Text(
-                style = MaterialTheme.typography.h5,
-                text = "$temp$DEGREE_SYMBOL",
-                modifier = Modifier.padding(8.dp),
+                Text(
+                    style = MaterialTheme.typography.h5,
+                    text = "$temp$DEGREE_SYMBOL",
+                    //modifier = Modifier.padding(8.dp),
 
-            )
+                )
 //            if(oneHour > 0.0){
 //                Text(
 //                    text = "$oneHour",
@@ -770,14 +796,14 @@ class WeatherFragment : Fragment() {
 //                    fontSize = 16.sp
 //                )
 //            }
+            }
         }
-    }
 
 
-    @Composable
-    fun HourlyCard(weatherState: OneCall) {
-        val hourly = weatherState.hourly
-        val offset = weatherState.offset
+        @Composable
+        fun HourlyCard(weatherState: OneCall) {
+            val hourly = weatherState.hourly
+            val offset = weatherState.offset
 //        Card(
 //            modifier = Modifier.fillMaxWidth()
 //                .padding(start = 16.dp, end = 16.dp, bottom = 8.dp, top = 8.dp)
@@ -786,15 +812,15 @@ class WeatherFragment : Fragment() {
 //        ) {
             LazyRow(
                 modifier = Modifier.fillMaxWidth()
-                    .padding(start = 8.dp, end = 8.dp, bottom = 8.dp, top = 8.dp),
+                    .padding(start = 8.dp, end = 8.dp, bottom = 24.dp, top = 8.dp),
 
-            ) {
+                ) {
                 items(hourly) { hour ->
                     val dt = hour.dt
                     val timestamp = getTimestampFromUnix(dt, offset)
                     val timestampDay: String = timestamp.substring(0, 3)
                     val dayOfWeek: String = getDayFromUnix(dt, offset)
-                    Timber.d(timestamp.toString() +"dtStamp")
+                    Timber.d(timestamp.toString() + "dtStamp")
 
                     HourlyColumn(hour, offset)
 
@@ -804,59 +830,58 @@ class WeatherFragment : Fragment() {
         }
 
 
+        @Composable
+        fun LiveDataLoadingComponent() {
 
-    @Composable
-    fun LiveDataLoadingComponent() {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
 
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-
-            CircularProgressIndicator(modifier = Modifier.wrapContentWidth(CenterHorizontally))
-        }
-    }
-
-
-    private fun refreshLocation() {
-
-
-        fusedLocationClient =
-            LocationServices.getFusedLocationProviderClient(this.requireActivity())
-
-        if (ActivityCompat.checkSelfPermission(
-                this.requireContext(),
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            Timber.d("Do not have location, requesting permission.")
-            requestPermissionLauncher.launch(Manifest.permission.ACCESS_COARSE_LOCATION)
-        } else {
-            Timber.d("Have permission, refreshing location")
-            locationer = true
-            fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
-                val lat: Double
-                val lon: Double
-
-                if (location == null) {
-                    lat = NYC_LAT.toDouble()
-                    lon = NYC_LON.toDouble()
-                } else {
-                    lat = location.latitude
-                    lon = location.longitude
-                }
-                viewModel.getWeather(lat.toString(), lon.toString())
-
+                CircularProgressIndicator(modifier = Modifier.wrapContentWidth(CenterHorizontally))
             }
         }
 
 
-    }
+        private fun refreshLocation() {
 
-    private fun goToSettings() {
-        val navController = findNavController()
-        navController.navigate(R.id.action_weatherFragment_to_settingsFragment)
-    }
 
-}
+            fusedLocationClient =
+                LocationServices.getFusedLocationProviderClient(this.requireActivity())
+
+            if (ActivityCompat.checkSelfPermission(
+                    this.requireContext(),
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                Timber.d("Do not have location, requesting permission.")
+                requestPermissionLauncher.launch(Manifest.permission.ACCESS_COARSE_LOCATION)
+            } else {
+                Timber.d("Have permission, refreshing location")
+                locationer = true
+                fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
+                    val lat: Double
+                    val lon: Double
+
+                    if (location == null) {
+                        lat = NYC_LAT.toDouble()
+                        lon = NYC_LON.toDouble()
+                    } else {
+                        lat = location.latitude
+                        lon = location.longitude
+                    }
+                    viewModel.getWeather(lat.toString(), lon.toString())
+
+                }
+            }
+
+
+        }
+
+        private fun goToSettings() {
+            val navController = findNavController()
+            navController.navigate(R.id.action_weatherFragment_to_settingsFragment)
+        }
+
+    }

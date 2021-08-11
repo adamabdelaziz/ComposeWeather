@@ -1,5 +1,9 @@
 package com.example.composeweather.util
 
+import androidx.compose.material.Colors
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
+import com.example.composeweather.ui.theme.Grey200
 import timber.log.Timber
 import java.lang.Math.floor
 import java.text.SimpleDateFormat
@@ -87,7 +91,8 @@ fun getDayFromUnix(unixTime: Double, offset: Double): String {
         else -> "Nani??"
     }
 }
-
+val Colors.snackbarAction: Color
+    @Composable get() = Grey200
 fun getTimestampFromUnix(unixTime: Double, offset: Double): String {
     val time = unixTime.plus(offset)
     val simpleDateFormat = SimpleDateFormat("hh a", Locale.ENGLISH)
