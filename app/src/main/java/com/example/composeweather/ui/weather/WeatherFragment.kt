@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import coil.compose.rememberImagePainter
 import com.example.composeweather.R
@@ -103,6 +104,8 @@ class WeatherFragment : Fragment() {
             val locationLiveData = viewModel.location
             val prefLiveData = viewModel.prefs
 
+            //Nested Sealed Class Flow calls to determine location privilege then to load the actual data
+            //Will also have to change refreshLocation() to use the flows 
             setContent {
 
                 val weatherState by oneCallLiveData.observeAsState(initial = oneCallLiveData.value)

@@ -20,4 +20,12 @@ interface WeatherService {
         @Query("appid") appid : String,
         @Query("units") units:String
     ): OneCall
+
+    @GET("onecall?")
+    suspend fun getOneCallLatLonResponse(
+        @Query("lat") lat: String,
+        @Query("lon") lon: String,
+        @Query("appid") appid : String,
+        @Query("units") units:String
+    ): Response<OneCall>
 }

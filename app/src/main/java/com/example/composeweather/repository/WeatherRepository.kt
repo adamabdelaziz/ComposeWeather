@@ -1,26 +1,23 @@
 package com.example.composeweather.repository
 
-import android.annotation.SuppressLint
-import android.location.Location
 import com.example.composeweather.domain.dao.WeatherDao
-import com.example.composeweather.domain.model.Coord
 import com.example.composeweather.domain.model.OneCall
-import com.example.composeweather.network.WeatherService
-import com.example.composeweather.util.API_KEY
-import com.example.composeweather.util.FAHRENHEIT
-import com.example.composeweather.util.NYC_LAT
-import com.example.composeweather.util.NYC_LON
-import com.google.android.gms.location.FusedLocationProviderClient
+import com.example.composeweather.network.WeatherRemoteDataSource
+import com.example.composeweather.util.performGetOperation
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 import timber.log.Timber
 import javax.inject.Inject
 
 class WeatherRepository @Inject constructor(
-    private val remoteDataSource: WeatherService,
+    private val remoteDataSource: WeatherRemoteDataSource,
     private val localDataSource: WeatherDao,
 ) {
 
     suspend fun getOneCall(lat: String, lon: String, unit: String): OneCall {
-        val oneCall = remoteDataSource.getOneCallLatLon(lat, lon, API_KEY, unit)
+        val oneCall = remoteDataSource.getOneCallLatLon(lat, lon, unit)
 
         if (oneCall != null) {
             Timber.d("ONECALL NOT NULL")
@@ -31,4 +28,14 @@ class WeatherRepository @Inject constructor(
             return localDataSource.getCurrentOneCall()
         }
     }
+
+    fun getOneCallResponse(lat: String, lon: String, unit: String) = performGetOperation(
+        databaseQuery = { localDataSource.getCurrentOneCallAsLiveData() },
+        networkCall = { remoteDataSource.getOneCallLatLonResponse(lat, lon, unit) },
+        saveCallResult = { localDataSource.insertOneCall(it) }
+    )
+
+    fun getOneCallFlow(lat: String, lon: String, unit: String): Flow<OneCall> = flow {
+        emit(remoteDataSource.getOneCallLatLon(lat, lon, unit))
+    }.flowOn(Dispatchers.IO)
 }

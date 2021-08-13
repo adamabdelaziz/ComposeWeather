@@ -3,6 +3,7 @@ package com.example.composeweather.di
 import android.content.Context
 import com.example.composeweather.domain.dao.WeatherDao
 import com.example.composeweather.domain.db.AppDatabase
+import com.example.composeweather.network.WeatherRemoteDataSource
 import com.example.composeweather.network.WeatherService
 import com.example.composeweather.preference.DataStoreManager
 import com.example.composeweather.repository.WeatherRepository
@@ -61,7 +62,7 @@ object AppModule {
 
     @Singleton
     @Provides
-    fun provideRepository(remoteDataSource: WeatherService, localDataSource: WeatherDao) =
+    fun provideRepository(remoteDataSource: WeatherRemoteDataSource, localDataSource: WeatherDao) =
         WeatherRepository(remoteDataSource, localDataSource)
 
 
