@@ -783,7 +783,7 @@ class WeatherFragment : Fragment() {
                     text = "$humidity%",
                     modifier = Modifier.padding(8.dp),
                 )
-               
+
                 if (!alerts.isNullOrEmpty()) {
                     Icon(
                         Icons.Rounded.Warning,
