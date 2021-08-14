@@ -32,7 +32,7 @@ class DataStoreManager @Inject constructor(@ApplicationContext appContext: Conte
         val LIGHTTHEME_ENABLED = booleanPreferencesKey("lightTheme")
     }
 
-    val preferencesFlow = settingsDataStore.data
+    val preferencesFlow  = settingsDataStore.data
         .catch { exception ->
             if (exception is IOException) {
                 Timber.d("IO Exception " + exception)

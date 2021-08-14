@@ -32,13 +32,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
+import androidx.lifecycle.Lifecycle
 import androidx.navigation.fragment.findNavController
 import coil.compose.rememberImagePainter
 import com.example.composeweather.R
@@ -49,6 +50,8 @@ import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.flowOf
 import timber.log.Timber
 import kotlin.math.roundToInt
 
@@ -99,18 +102,18 @@ class WeatherFragment : Fragment() {
     ): View {
         return ComposeView(requireContext()).apply {
             viewModel.getPrefs()
+            refreshLocation()
             Timber.d("onCreateView called in WeatherFragment")
             val oneCallLiveData = viewModel.oneCall
             val locationLiveData = viewModel.location
             val prefLiveData = viewModel.prefs
-
-            //Nested Sealed Class Flow calls to determine location privilege then to load the actual data
-            //Will also have to change refreshLocation() to use the flows 
+            val oneCallFlow = viewModel.oneCallStateFlow
             setContent {
 
                 val weatherState by oneCallLiveData.observeAsState(initial = oneCallLiveData.value)
                 val locationState by locationLiveData.observeAsState(initial = locationLiveData.value)
                 val prefState by prefLiveData.observeAsState(initial = prefLiveData.value)
+                val weatherFlow by oneCallFlow.collectAsState()
 
                 if (locationState != null) {
                     if (locationState == true) {
@@ -163,6 +166,125 @@ class WeatherFragment : Fragment() {
             }
         }
     }
+            //val scope = rememberCoroutineScope()
+
+            //Nested Sealed Class Flow calls to determine location privilege then to load the actual data
+            //Will also have to change refreshLocation() to use the flows
+            //refreshLocation()
+
+
+//            lifecycleScope.launchWhenStarted {
+//
+//                viewModel.oneCallStateFlow.collect { it ->
+//                    when (it) {
+//                        is OneCallState.Loading -> {
+//                            setContent {
+//                                Timber.d("OneCallState.Loading")
+//                                LiveDataLoadingComponent()
+//                            }
+//                        }
+//                        is OneCallState.Success -> {
+//                            setContent {
+//                                Timber.d("OneCallState.Success")
+//                                val theme = prefLiveData.value!!.lightTheme ?: false
+//                                ComposeWeatherTheme(theme){
+//                                    MainWeatherComponent(it.data)
+//                                }
+//
+//                            }
+//                        }
+//                        is OneCallState.Failure -> {
+//                            setContent {
+//                                LiveDataLoadingComponent()
+//                                Toast.makeText(
+//                                    context,
+//                                    "Please Enable Location Services",
+//                                    Toast.LENGTH_LONG
+//                                ).show()
+//                                Timber.d("OneCallState.Failure")
+//                            }
+//                        }
+//                        is OneCallState.Empty -> {
+//                            Timber.d("OneCallState.Empty")
+//                        }
+//                    }
+//                }
+//
+//            }
+
+
+
+//                when(locationState){
+//                    true -> {
+//                        Timber.d("locationState True")
+//                        when (weatherFlow) {
+//                            is OneCallState.Loading -> {
+//                                Timber.d("OneCallState.Loading")
+//
+////                                ComposeWeatherTheme(prefState!!.lightTheme) {
+////                                    LiveDataLoadingComponent()
+////                                }
+//                            }
+//                            is OneCallState.Success -> {
+//                                Timber.d("OneCallState.Success")
+//                                val data  = remember { (weatherFlow as OneCallState.Success).data}
+//                                ComposeWeatherTheme(prefState!!.lightTheme){
+//                                    MainWeatherComponent(data)
+//                                }
+//                            }
+//                            is OneCallState.Failure -> {
+//                                ComposeWeatherTheme(prefState!!.lightTheme) {
+//                                    LiveDataLoadingComponent()
+//                                    refreshLocation()
+//                                }
+//                                Timber.d("OneCallState.Failure")
+//                            }
+//                            is OneCallState.Empty -> {
+//                                refreshLocation()
+//                                Timber.d("OneCallState.Empty")
+//                            }
+//
+//                        }
+//                    }
+//                    false -> {
+//                        viewModel.getOneCallFlow(NYC_LAT, NYC_LON)
+//                        Timber.d("locationState False")
+//                        when (weatherFlow) {
+//                            is OneCallState.Loading -> {
+//                                Timber.d("OneCallState.Loading")
+//                                ComposeWeatherTheme(prefState!!.lightTheme) {
+//                                    LiveDataLoadingComponent()
+//                                }
+//                            }
+//                            is OneCallState.Success -> {
+//                                Timber.d("OneCallState.Success")
+//                                val data  = remember { (weatherFlow as OneCallState.Success).data}
+//                                ComposeWeatherTheme(prefState!!.lightTheme){
+//                                    MainWeatherComponent(data)
+//                                }
+//                            }
+//                            is OneCallState.Failure -> {
+//                                ComposeWeatherTheme(prefState!!.lightTheme) {
+//                                    LiveDataLoadingComponent()
+//                                    refreshLocation()
+//                                }
+//                                Timber.d("OneCallState.Failure")
+//                            }
+//                            is OneCallState.Empty -> {
+//                                refreshLocation()
+//                                Timber.d("OneCallState.Empty")
+//                            }
+//
+//                        }
+//                    }
+//                    null -> {
+//                        Timber.d("locationState Null")
+//                        LiveDataLoadingComponent()
+//                    }
+//                }
+
+
+
 
     @Composable
     fun SetStatusBar() {
@@ -182,7 +304,7 @@ class WeatherFragment : Fragment() {
     @Composable
     fun MainWeatherComponent(weatherState: OneCall) {
 
-
+        //val weather = remember { weatherState }
         val addressList = geocoder.getFromLocation(weatherState.lat, weatherState.lon, 5)
         val title = getTitle(addressList)
 
@@ -505,48 +627,49 @@ class WeatherFragment : Fragment() {
         }
 
     }
-        /**
-         * Maybe make this expandable as well? And display hourly information here? Probably wont be very useful if it shows hours that already past though
-         * Also add alerts here maybe as a clickable dialog or something
-         */
-        @Composable
-        fun CurrentCard(weatherState: OneCall) {
 
-            val current = weatherState.current
-            val alerts = weatherState.alerts
-            val hourly = weatherState.hourly
-            val offset = weatherState.offset
+    /**
+     * Maybe make this expandable as well? And display hourly information here? Probably wont be very useful if it shows hours that already past though
+     * Also add alerts here maybe as a clickable dialog or something
+     */
+    @Composable
+    fun CurrentCard(weatherState: OneCall) {
 
-            var openDialog by remember { mutableStateOf(false) }
-            var expanded by remember { mutableStateOf(false) }
+        val current = weatherState.current
+        val alerts = weatherState.alerts
+        val hourly = weatherState.hourly
+        val offset = weatherState.offset
 
-            val temp = current.temp.roundToInt()
-            val feelsLike = current.feels_like.roundToInt()
-            val humidity = current.humidity
-            val clouds = current.clouds
-            val windSpeed = current.wind_speed
-            val weather = current.weather.first()
+        var openDialog by remember { mutableStateOf(false) }
+        var expanded by remember { mutableStateOf(false) }
 
-            val rainObject = current.rain ?: Rain(0.0, 0.0)
-            val snowObject = current.snow ?: Snow(0.0, 0.0)
+        val temp = current.temp.roundToInt()
+        val feelsLike = current.feels_like.roundToInt()
+        val humidity = current.humidity
+        val clouds = current.clouds
+        val windSpeed = current.wind_speed
+        val weather = current.weather.first()
 
-            val rain = rainObject.oneHour
-            val snow = snowObject.oneHour
+        val rainObject = current.rain ?: Rain(0.0, 0.0)
+        val snowObject = current.snow ?: Snow(0.0, 0.0)
 
-            Timber.d("$rain + currentCardRain")
-            val timezone = weatherState.timezone
+        val rain = rainObject.oneHour
+        val snow = snowObject.oneHour
+
+        Timber.d("$rain + currentCardRain")
+        val timezone = weatherState.timezone
 
 
-            if (openDialog) {
+        if (openDialog) {
 
-                AlertDialog(
-                    onDismissRequest = {
-                        // Dismiss the dialog when the user clicks outside the dialog or on the back
-                        // button. If you want to disable that functionality, simply use an empty
-                        // onCloseRequest.
-                        openDialog = false
-                    },
-                    text = {Alert(alerts)},
+            AlertDialog(
+                onDismissRequest = {
+                    // Dismiss the dialog when the user clicks outside the dialog or on the back
+                    // button. If you want to disable that functionality, simply use an empty
+                    // onCloseRequest.
+                    openDialog = false
+                },
+                text = { Alert(alerts) },
 //                    text = { Column() {
 //                        for (alert in alerts) {
 //                            Text(
@@ -560,16 +683,16 @@ class WeatherFragment : Fragment() {
 //                            )
 //                            Spacer(modifier = Modifier.size(8.dp))
 //                        }
- //                   }},
-                    confirmButton = {
-                        Button(
+                //                   }},
+                confirmButton = {
+                    Button(
 
-                            onClick = {
-                                openDialog = false
-                            }) {
-                            Text(stringResource(R.string.thanks_bro))
-                        }
-                    })
+                        onClick = {
+                            openDialog = false
+                        }) {
+                        Text(stringResource(R.string.thanks_bro))
+                    }
+                })
 //                dismissButton = {
 //                    Button(
 //
@@ -579,23 +702,23 @@ class WeatherFragment : Fragment() {
 //                        Text("D")
 //                    }
 //                })
-            }
+        }
 
 //        Card(
 //            modifier = Modifier.fillMaxWidth().padding(16.dp),
 //            shape = RoundedCornerShape(20.dp),
 //        ) {
-            Column(
-                //Column modifiers go here
-                modifier = Modifier.fillMaxWidth().padding(16.dp),
+        Column(
+            //Column modifiers go here
+            modifier = Modifier.fillMaxWidth().padding(16.dp),
 
-                ) {
-                Text(
-                    text = "$temp$DEGREE_SYMBOL",
-                    modifier = Modifier.align(CenterHorizontally).padding(8.dp),
-                    fontSize = 64.sp,
+            ) {
+            Text(
+                text = "$temp$DEGREE_SYMBOL",
+                modifier = Modifier.align(CenterHorizontally).padding(8.dp),
+                fontSize = 64.sp,
 
-                    )
+                )
 //                if (temp != feelsLike) {
 //                    Text(
 //                        text = "Feels like $feelsLike$DEGREE_SYMBOL",
@@ -603,122 +726,122 @@ class WeatherFragment : Fragment() {
 //                        fontSize = 32.sp
 //                    )
 //                }
-                Row(
-                    //Row Modifiers go here
-                    modifier = Modifier.align(CenterHorizontally),
-                    horizontalArrangement = Arrangement.Start,
-                    verticalAlignment = Alignment.CenterVertically
+            Row(
+                //Row Modifiers go here
+                modifier = Modifier.align(CenterHorizontally),
+                horizontalArrangement = Arrangement.Start,
+                verticalAlignment = Alignment.CenterVertically
 
-                ) {
-                    if (rain > 0.0) {
-                        Image(
-                            painter = rememberImagePainter(RAIN_ICON_NIGHT),
-                            contentDescription = stringResource(R.string.rain_icon_description),
-                            modifier = Modifier.clickable(onClick = {
-                                Toast.makeText(
-                                    context,
-                                    R.string.rain_icon_description,
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            }).size(64.dp)
-                        )
-                        Text(
-                            style = MaterialTheme.typography.h5,
-                            text = "${toInches(rain)} in.",
-                            modifier = Modifier.padding(4.dp),
-                        )
-                    }
-                    if (snow > 0.0) {
-                        Image(
-                            painter = rememberImagePainter(SNOW_ICON_NIGHT),
-                            contentDescription = stringResource(R.string.snow_icon_description),
-                            modifier = Modifier.clickable(onClick = {
-                                Toast.makeText(
-                                    context,
-                                    R.string.snow_icon_description,
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            }).size(64.dp)
-                        )
-                        Text(
-                            style = MaterialTheme.typography.h5,
-                            text = "${toInches(snow)} in.",
-                            modifier = Modifier.padding(4.dp),
-
-                            )
-                    }
-                    when (clouds.toInt()) {
-                        in 0..25 -> {
-                            Image(
-                                painter = rememberImagePainter(FEW_CLOUDS_NIGHT),
-                                contentDescription = stringResource(R.string.cloud_icon_description),
-                                modifier = Modifier.clickable(onClick = {
-                                    Toast.makeText(
-                                        context,
-                                        R.string.cloud_icon_description,
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                }).size(64.dp)
-                            )
-                        }
-                        in 25..50 -> {
-                            Image(
-                                painter = rememberImagePainter(SCATTERED_CLOUDS_NIGHT),
-                                contentDescription = stringResource(R.string.cloud_icon_description),
-                                modifier = Modifier.clickable(onClick = {
-                                    Toast.makeText(
-                                        context,
-                                        R.string.cloud_icon_description,
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                }).size(64.dp)
-                            )
-                        }
-                        in 50..100 -> {
-                            Image(
-                                painter = rememberImagePainter(OVERCAST_CLOUDS_NIGHT),
-                                contentDescription = stringResource(R.string.cloud_icon_description),
-                                modifier = Modifier.clickable(onClick = {
-                                    Toast.makeText(
-                                        context,
-                                        R.string.cloud_icon_description,
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                }).size(64.dp)
-
-                            )
-                        }
-                    }
-                    Text(
-                        style = MaterialTheme.typography.h5,
-                        text = "$clouds%",
-                        modifier = Modifier.padding(8.dp),
-                    )
+            ) {
+                if (rain > 0.0) {
                     Image(
-                        painter = rememberImagePainter(R.drawable.humidity200xx),
-                        contentDescription = stringResource(R.string.humidity_icon_description),
+                        painter = rememberImagePainter(RAIN_ICON_NIGHT),
+                        contentDescription = stringResource(R.string.rain_icon_description),
                         modifier = Modifier.clickable(onClick = {
                             Toast.makeText(
                                 context,
-                                R.string.humidity_icon_description,
+                                R.string.rain_icon_description,
                                 Toast.LENGTH_SHORT
                             ).show()
                         }).size(64.dp)
                     )
                     Text(
                         style = MaterialTheme.typography.h5,
-                        text = "$humidity%",
-                        modifier = Modifier.padding(8.dp),
+                        text = "${toInches(rain)} in.",
+                        modifier = Modifier.padding(4.dp),
                     )
-                    //Except this isnt always true and its crashed because it was null when there were no alerts soooo
-                    if (alerts !== null) {
-                        Icon(
-                            Icons.Rounded.Warning,
-                            tint = MaterialTheme.colors.secondary,
-                            contentDescription = "warning",
-                            modifier = Modifier.clickable { openDialog = true }.size(64.dp)
-                                .padding(8.dp),
+                }
+                if (snow > 0.0) {
+                    Image(
+                        painter = rememberImagePainter(SNOW_ICON_NIGHT),
+                        contentDescription = stringResource(R.string.snow_icon_description),
+                        modifier = Modifier.clickable(onClick = {
+                            Toast.makeText(
+                                context,
+                                R.string.snow_icon_description,
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }).size(64.dp)
+                    )
+                    Text(
+                        style = MaterialTheme.typography.h5,
+                        text = "${toInches(snow)} in.",
+                        modifier = Modifier.padding(4.dp),
+
                         )
+                }
+                when (clouds.toInt()) {
+                    in 0..25 -> {
+                        Image(
+                            painter = rememberImagePainter(FEW_CLOUDS_NIGHT),
+                            contentDescription = stringResource(R.string.cloud_icon_description),
+                            modifier = Modifier.clickable(onClick = {
+                                Toast.makeText(
+                                    context,
+                                    R.string.cloud_icon_description,
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }).size(64.dp)
+                        )
+                    }
+                    in 25..50 -> {
+                        Image(
+                            painter = rememberImagePainter(SCATTERED_CLOUDS_NIGHT),
+                            contentDescription = stringResource(R.string.cloud_icon_description),
+                            modifier = Modifier.clickable(onClick = {
+                                Toast.makeText(
+                                    context,
+                                    R.string.cloud_icon_description,
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }).size(64.dp)
+                        )
+                    }
+                    in 50..100 -> {
+                        Image(
+                            painter = rememberImagePainter(OVERCAST_CLOUDS_NIGHT),
+                            contentDescription = stringResource(R.string.cloud_icon_description),
+                            modifier = Modifier.clickable(onClick = {
+                                Toast.makeText(
+                                    context,
+                                    R.string.cloud_icon_description,
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }).size(64.dp)
+
+                        )
+                    }
+                }
+                Text(
+                    style = MaterialTheme.typography.h5,
+                    text = "$clouds%",
+                    modifier = Modifier.padding(8.dp),
+                )
+                Image(
+                    painter = rememberImagePainter(R.drawable.humidity200xx),
+                    contentDescription = stringResource(R.string.humidity_icon_description),
+                    modifier = Modifier.clickable(onClick = {
+                        Toast.makeText(
+                            context,
+                            R.string.humidity_icon_description,
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }).size(64.dp)
+                )
+                Text(
+                    style = MaterialTheme.typography.h5,
+                    text = "$humidity%",
+                    modifier = Modifier.padding(8.dp),
+                )
+                //Except this isnt always true and its crashed because it was null when there were no alerts soooo
+                if (alerts !== null) {
+                    Icon(
+                        Icons.Rounded.Warning,
+                        tint = MaterialTheme.colors.secondary,
+                        contentDescription = "warning",
+                        modifier = Modifier.clickable { openDialog = true }.size(64.dp)
+                            .padding(8.dp),
+                    )
 
 //                        Image(
 //                            painter = rememberImagePainter(R.drawable.outline_warning_white_24),
@@ -728,70 +851,70 @@ class WeatherFragment : Fragment() {
 //                            }).size(40.dp)
 //                        )
 
-                    }
-
-                    //End of Row
-
                 }
+
+                //End of Row
+
+            }
 //                if (expanded) {
 //                    Hourly(hourly, offset)
 //                } //End of Column
-            }
-            //End of Card
         }
+        //End of Card
+    }
 
 
-        @Composable
-        fun HourlyColumn(hour: Hourly, offset: Double) {
-            val dt = hour.dt
+    @Composable
+    fun HourlyColumn(hour: Hourly, offset: Double) {
+        val dt = hour.dt
 
-            val hourTime = getTimestampFromUnix(dt, offset)
-            Timber.d(hourTime + " hourTime")
+        val hourTime = getTimestampFromUnix(dt, offset)
+        Timber.d(hourTime + " hourTime")
 
-            val rain = hour.rain ?: Rain(0.0, 0.0)
-            val oneHour = rain.oneHour
-            val weather = hour.weather.first()
-            val pop = hour.pop.times(100).roundToInt()
-            val icon = getIconLarge(weather.icon)
-            val temp = hour.temp.roundToInt()
+        val rain = hour.rain ?: Rain(0.0, 0.0)
+        val oneHour = rain.oneHour
+        val weather = hour.weather.first()
+        val pop = hour.pop.times(100).roundToInt()
+        val icon = getIconLarge(weather.icon)
+        val temp = hour.temp.roundToInt()
 
-            Column(
-                modifier = Modifier
-                    .padding(start = 8.dp, top = 0.dp, bottom = 0.dp, end = 8.dp),
-                verticalArrangement = Arrangement.SpaceEvenly,
-                horizontalAlignment = Alignment.CenterHorizontally,
+        Column(
+            modifier = Modifier
+                .padding(start = 8.dp, top = 0.dp, bottom = 0.dp, end = 8.dp),
+            verticalArrangement = Arrangement.SpaceEvenly,
+            horizontalAlignment = Alignment.CenterHorizontally,
 
-                ) {
+            ) {
+            Text(
+                style = MaterialTheme.typography.h5,
+                text = hourTime,
+                //modifier = Modifier.padding(8.dp),
+            )
+            if (pop > 0.0) {
                 Text(
-                    style = MaterialTheme.typography.h5,
-                    text = hourTime,
+                    style = MaterialTheme.typography.subtitle2,
+                    text = "$pop%",
                     //modifier = Modifier.padding(8.dp),
                 )
-                if (pop > 0.0) {
-                    Text(
-                        style = MaterialTheme.typography.subtitle2,
-                        text = "$pop%",
-                        //modifier = Modifier.padding(8.dp),
-                    )
-                } else {
-                    Text(
-                        style = MaterialTheme.typography.subtitle2,
-                        text = "",
-                        //modifier = Modifier.padding(8.dp),
-                    )
-                }
-                Image(
-                    painter = rememberImagePainter(icon),
-                    contentDescription = stringResource(R.string.rain_icon_description),
-                    modifier = Modifier.size(96.dp)
-                    //.padding(8.dp,4.dp)
-                )
+            } else {
                 Text(
-                    style = MaterialTheme.typography.h5,
-                    text = "$temp$DEGREE_SYMBOL",
+                    style = MaterialTheme.typography.subtitle2,
+                    text = "",
                     //modifier = Modifier.padding(8.dp),
-
                 )
+            }
+            Image(
+                painter = rememberImagePainter(icon),
+                contentDescription = stringResource(R.string.rain_icon_description),
+                modifier = Modifier.size(96.dp)
+                //.padding(8.dp,4.dp)
+            )
+            Text(
+                style = MaterialTheme.typography.h5,
+                text = "$temp$DEGREE_SYMBOL",
+                //modifier = Modifier.padding(8.dp),
+
+            )
 //            if(oneHour > 0.0){
 //                Text(
 //                    text = "$oneHour",
@@ -799,92 +922,94 @@ class WeatherFragment : Fragment() {
 //                    fontSize = 16.sp
 //                )
 //            }
-            }
         }
+    }
 
 
-        @Composable
-        fun HourlyCard(weatherState: OneCall) {
-            val hourly = weatherState.hourly
-            val offset = weatherState.offset
+    @Composable
+    fun HourlyCard(weatherState: OneCall) {
+        val hourly = weatherState.hourly
+        val offset = weatherState.offset
 //        Card(
 //            modifier = Modifier.fillMaxWidth()
 //                .padding(start = 16.dp, end = 16.dp, bottom = 8.dp, top = 8.dp)
 //                .animateContentSize(),
 //            shape = RoundedCornerShape(20.dp),
 //        ) {
-            LazyRow(
-                modifier = Modifier.fillMaxWidth()
-                    .padding(start = 8.dp, end = 8.dp, bottom = 24.dp, top = 8.dp),
+        LazyRow(
+            modifier = Modifier.fillMaxWidth()
+                .padding(start = 8.dp, end = 8.dp, bottom = 24.dp, top = 8.dp),
 
-                ) {
-                items(hourly) { hour ->
-                    val dt = hour.dt
-                    val timestamp = getTimestampFromUnix(dt, offset)
-                    val timestampDay: String = timestamp.substring(0, 3)
-                    val dayOfWeek: String = getDayFromUnix(dt, offset)
-                    Timber.d(timestamp.toString() + "dtStamp")
-
-                    HourlyColumn(hour, offset)
-
-
-                }
-            }
-        }
-
-
-        @Composable
-        fun LiveDataLoadingComponent() {
-
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
             ) {
+            items(hourly) { hour ->
+                val dt = hour.dt
+                val timestamp = getTimestampFromUnix(dt, offset)
+                val timestampDay: String = timestamp.substring(0, 3)
+                val dayOfWeek: String = getDayFromUnix(dt, offset)
+                Timber.d(timestamp.toString() + "dtStamp")
 
-                CircularProgressIndicator(modifier = Modifier.wrapContentWidth(CenterHorizontally))
+                HourlyColumn(hour, offset)
+
+
             }
         }
+    }
 
 
-        private fun refreshLocation() {
+    @Composable
+    fun LiveDataLoadingComponent() {
+
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+
+            CircularProgressIndicator(modifier = Modifier.wrapContentWidth(CenterHorizontally))
+        }
+    }
 
 
-            fusedLocationClient =
-                LocationServices.getFusedLocationProviderClient(this.requireActivity())
+    private fun refreshLocation() {
 
-            if (ActivityCompat.checkSelfPermission(
-                    this.requireContext(),
-                    Manifest.permission.ACCESS_COARSE_LOCATION
-                ) != PackageManager.PERMISSION_GRANTED
-            ) {
-                Timber.d("Do not have location, requesting permission.")
-                requestPermissionLauncher.launch(Manifest.permission.ACCESS_COARSE_LOCATION)
-            } else {
-                Timber.d("Have permission, refreshing location")
-                locationer = true
-                fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
-                    val lat: Double
-                    val lon: Double
 
-                    if (location == null) {
-                        lat = NYC_LAT.toDouble()
-                        lon = NYC_LON.toDouble()
-                    } else {
-                        lat = location.latitude
-                        lon = location.longitude
-                    }
-                    viewModel.getWeather(lat.toString(), lon.toString())
+        fusedLocationClient =
+            LocationServices.getFusedLocationProviderClient(this.requireActivity())
 
+        if (ActivityCompat.checkSelfPermission(
+                this.requireContext(),
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            Timber.d("Do not have location, requesting permission.")
+            requestPermissionLauncher.launch(Manifest.permission.ACCESS_COARSE_LOCATION)
+        } else {
+            Timber.d("Have permission, refreshing location")
+            locationer = true
+            fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
+                val lat: Double
+                val lon: Double
+
+                if (location == null) {
+                    lat = NYC_LAT.toDouble()
+                    lon = NYC_LON.toDouble()
+                } else {
+                    lat = location.latitude
+                    lon = location.longitude
                 }
+                viewModel.getWeather(lat.toString(), lon.toString())
+                //viewModel.getOneCallFlow(lat.toString(), lon.toString())
+
             }
-
-
         }
 
-        private fun goToSettings() {
-            val navController = findNavController()
-            navController.navigate(R.id.action_weatherFragment_to_settingsFragment)
-        }
 
     }
+
+    private fun goToSettings() {
+        val navController = findNavController()
+        navController.navigate(R.id.action_weatherFragment_to_settingsFragment)
+    }
+
+}
+

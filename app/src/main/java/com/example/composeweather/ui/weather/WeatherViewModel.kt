@@ -44,7 +44,10 @@ class WeatherViewModel @Inject constructor(
     val oneCallStateFlow: StateFlow<OneCallState> = _oneCallStateFlow
 
     fun getOneCallFlow(lat: String, lon: String) = viewModelScope.launch {
-        _oneCallStateFlow.value = OneCallState.Loading
+
+            _oneCallStateFlow.value = OneCallState.Loading
+
+
         val weatherPreferences = preferencesFlow.first()
 
         if (weatherPreferences.celsiusEnabled) {
@@ -56,6 +59,7 @@ class WeatherViewModel @Inject constructor(
             repository.getOneCallFlow(lat, lon, FAHRENHEIT)
                 .catch { e -> _oneCallStateFlow.value = OneCallState.Failure(e) }
                 .collect { data -> _oneCallStateFlow.value = OneCallState.Success(data) }
+
         }
     }
 
