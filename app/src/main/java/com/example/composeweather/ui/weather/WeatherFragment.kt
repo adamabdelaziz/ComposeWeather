@@ -783,8 +783,8 @@ class WeatherFragment : Fragment() {
                     text = "$humidity%",
                     modifier = Modifier.padding(8.dp),
                 )
-                //Except this isnt always true and its crashed because it was null when there were no alerts soooo
-                if (alerts !== null) {
+               
+                if (!alerts.isNullOrEmpty()) {
                     Icon(
                         Icons.Rounded.Warning,
                         tint = MaterialTheme.colors.secondary,
