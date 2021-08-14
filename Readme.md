@@ -1,7 +1,7 @@
 # ComposeWeather
 Weather app made with Jetpack Compose and using the OpenWeatherMap API
 
-Jetpack Compose
+
 
 MVVM
 
