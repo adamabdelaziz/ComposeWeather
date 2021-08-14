@@ -3,7 +3,7 @@ package com.example.composeweather.repository
 import com.example.composeweather.domain.dao.WeatherDao
 import com.example.composeweather.domain.model.OneCall
 import com.example.composeweather.network.WeatherRemoteDataSource
-import com.example.composeweather.util.performGetOperation
+
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -18,7 +18,11 @@ class WeatherRepository @Inject constructor(
 
     suspend fun getOneCall(lat: String, lon: String, unit: String): OneCall {
         val oneCall = remoteDataSource.getOneCallLatLon(lat, lon, unit)
+        val localCall = getLatestOneCall()
 
+        if(localCall!= null){
+            return localCall
+        }
         if (oneCall != null) {
             Timber.d("ONECALL NOT NULL")
             localDataSource.insertOneCall(oneCall)
@@ -28,14 +32,20 @@ class WeatherRepository @Inject constructor(
             return localDataSource.getCurrentOneCall()
         }
     }
-
-    fun getOneCallResponse(lat: String, lon: String, unit: String) = performGetOperation(
-        databaseQuery = { localDataSource.getCurrentOneCallAsLiveData() },
-        networkCall = { remoteDataSource.getOneCallLatLonResponse(lat, lon, unit) },
-        saveCallResult = { localDataSource.insertOneCall(it) }
-    )
-
-    fun getOneCallFlow(lat: String, lon: String, unit: String): Flow<OneCall> = flow {
-        emit(remoteDataSource.getOneCallLatLon(lat, lon, unit))
-    }.flowOn(Dispatchers.IO)
+    suspend fun insertOneCall(oneCall: OneCall){
+        localDataSource.insertOneCall(oneCall)
+    }
+    suspend fun getLatestOneCall() :OneCall{
+        return localDataSource.getCurrentOneCall()
+    }
+//
+//    fun getOneCallResponse(lat: String, lon: String, unit: String) = performGetOperation(
+//        databaseQuery = { localDataSource.getCurrentOneCallAsLiveData() },
+//        networkCall = { remoteDataSource.getOneCallLatLonResponse(lat, lon, unit) },
+//        saveCallResult = { localDataSource.insertOneCall(it) }
+//    )
+//
+//    fun getOneCallFlow(lat: String, lon: String, unit: String): Flow<OneCall> = flow {
+//        emit(remoteDataSource.getOneCallLatLon(lat, lon, unit))
+//    }.flowOn(Dispatchers.IO)
 }

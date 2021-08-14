@@ -3,6 +3,7 @@ package com.example.composeweather.util
 import androidx.room.TypeConverter
 import com.example.composeweather.domain.model.*
 import com.google.gson.Gson
+import timber.log.Timber
 
 class Converters {
 
@@ -11,7 +12,8 @@ class Converters {
     fun feelsLikeToString(feelsLike: FeelsLike): String = Gson().toJson(feelsLike)
 
     @TypeConverter
-    fun stringToFeelsLike(string: String?): FeelsLike? = Gson().fromJson(string, FeelsLike::class.java)
+    fun stringToFeelsLike(string: String?): FeelsLike? =
+        Gson().fromJson(string, FeelsLike::class.java)
 
     //Current
     @TypeConverter
@@ -67,11 +69,21 @@ class Converters {
 
     //ListAlert
     @TypeConverter
-    fun alertListToString(value: List<Alert>?) = Gson().toJson(value)
+    fun alertListToString(value: List<Alert>?): String? {
+        return if (value == null) null else Gson().toJson(value)
+    }
 
     @TypeConverter
-    fun stringToAlertList(value: String?) =
-        Gson().fromJson(value, Array<Alert>::class.java).toList()
+    fun stringToAlertList(value: String?): List<Alert>? {
+        Timber.d(value + " value")
+        return if (value == "null") {
+            null
+        } else {
+            Gson().fromJson(value, Array<Alert>::class.java).toList() ?: emptyList()
+        }
+
+    }
+
 
     //Alert
     @TypeConverter

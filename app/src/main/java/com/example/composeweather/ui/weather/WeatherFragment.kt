@@ -27,19 +27,16 @@ import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.rounded.Warning
 import androidx.compose.runtime.*
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Lifecycle
 import androidx.navigation.fragment.findNavController
 import coil.compose.rememberImagePainter
 import com.example.composeweather.R
@@ -50,8 +47,6 @@ import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.flowOf
 import timber.log.Timber
 import kotlin.math.roundToInt
 
@@ -77,12 +72,12 @@ class WeatherFragment : Fragment() {
         requestPermissionLauncher =
             registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
                 if (isGranted) {
-                    viewModel.onLocationSettingsSelected(true)
-                    locationer = true
+                    viewModel.onTriggerEvent(OneCallEvent.UpdateLocation(true))
+                    //locationer = true
                     Timber.d("Permission granted")
                 } else {
                     //Probably
-                    viewModel.onLocationSettingsSelected(false)
+                    viewModel.onTriggerEvent(OneCallEvent.UpdateLocation(false))
                     Timber.d("Permission denied")
                     Toast.makeText(
                         context,
@@ -100,191 +95,146 @@ class WeatherFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        Timber.d("onCreateViewZ called in WeatherFragment")
+        refreshLocation()
         return ComposeView(requireContext()).apply {
-            viewModel.getPrefs()
-            refreshLocation()
+
             Timber.d("onCreateView called in WeatherFragment")
-            val oneCallLiveData = viewModel.oneCall
-            val locationLiveData = viewModel.location
-            val prefLiveData = viewModel.prefs
-            val oneCallFlow = viewModel.oneCallStateFlow
+
             setContent {
 
-                val weatherState by oneCallLiveData.observeAsState(initial = oneCallLiveData.value)
-                val locationState by locationLiveData.observeAsState(initial = locationLiveData.value)
-                val prefState by prefLiveData.observeAsState(initial = prefLiveData.value)
-                val weatherFlow by oneCallFlow.collectAsState()
+                val loading = viewModel.loading.value
+                val prefsLoading = viewModel.prefsLoading.value
+                val lat = viewModel.lat.value
+                val lon = viewModel.lon.value
+                val location = viewModel.location.value
+                val prefs = viewModel.prefs.value
+                val oneCall = viewModel.oneCall.value
+                val celsiusEnabled = viewModel.celsiusEnabled.value
 
-                if (locationState != null) {
-                    if (locationState == true) {
-                        Timber.d("locationState isnt null and true")
-                        refreshLocation()
-                        if (weatherState != null) {
-
-                            Timber.d(prefState.toString() + " prefState")
-                            ComposeWeatherTheme(prefState!!.lightTheme) {
-                                Timber.d("path 1")
-                                MainWeatherComponent(weatherState!!)
+                if(location){
+                    if (loading || prefsLoading) {
+                        if(prefs!= null &&oneCall!= null){
+                            ComposeWeatherTheme(prefs.lightTheme){
+                                MainWeatherComponent(oneCall)
                             }
-                        } else {
-                            ComposeWeatherTheme(false) {
-                                Timber.d("path 2")
-                                LiveDataLoadingComponent()
-                            }
-                        }
-                    } else {
-                        Timber.d("locationState isnt null and false")
-                        viewModel.getWeather(NYC_LAT, NYC_LON)
-                        if (weatherState != null) {
-
-                            ComposeWeatherTheme(false) {
-                                Timber.d("path 3")
-                                MainWeatherComponent(weatherState!!)
-                            }
-                        } else {
-                            ComposeWeatherTheme(false) {
-                                Timber.d("path 4")
-                                LiveDataLoadingComponent()
-                            }
-                        }
-                    }
-                } else {
-                    Timber.d("locationState is null")
-                    viewModel.getWeather(NYC_LAT, NYC_LON)
-                    if (weatherState != null) {
-                        ComposeWeatherTheme(false) {
-                            Timber.d("path 5")
-                            MainWeatherComponent(weatherState!!)
-                        }
-                    } else {
-                        ComposeWeatherTheme(false) {
-                            Timber.d("path 6")
+                        }else{
                             LiveDataLoadingComponent()
+                        }
+
+                    }
+                    else if(!loading && !prefsLoading){
+                        if(prefs != null && oneCall != null){
+                            ComposeWeatherTheme(prefs.lightTheme){
+                                MainWeatherComponent(oneCall)
+                            }
                         }
                     }
                 }
+                else if(!location){
+                    if(prefs != null){
+                       // viewModel.onTriggerEvent(OneCallEvent.RefreshWeather(NYC_LAT, NYC_LON))
+                    }
+
+                }
+
             }
-        }
-    }
-            //val scope = rememberCoroutineScope()
-
-            //Nested Sealed Class Flow calls to determine location privilege then to load the actual data
-            //Will also have to change refreshLocation() to use the flows
-            //refreshLocation()
-
-
-//            lifecycleScope.launchWhenStarted {
+//            setContent {
+//                val liveDataWrap = viewModel.weatherLiveDataWrap.observeAsState().value
+//                val prefState = viewModel.prefs.observeAsState().value
+//                val locationState = viewModel.location.observeAsState().value
 //
-//                viewModel.oneCallStateFlow.collect { it ->
-//                    when (it) {
+//                if (locationState == true) {
+//                    when (liveDataWrap) {
+//                        is OneCallState.Empty -> {
+//                            Timber.d("Empty")
+//                        }
+//                        is OneCallState.Failure -> {
+//                            Timber.d("Failure")
+//                        }
 //                        is OneCallState.Loading -> {
-//                            setContent {
-//                                Timber.d("OneCallState.Loading")
-//                                LiveDataLoadingComponent()
+//                            if (prefState != null) {
+//                                ComposeWeatherTheme(prefState.lightTheme) {
+//                                    LiveDataLoadingComponent()
+//                                }
 //                            }
 //                        }
 //                        is OneCallState.Success -> {
-//                            setContent {
-//                                Timber.d("OneCallState.Success")
-//                                val theme = prefLiveData.value!!.lightTheme ?: false
-//                                ComposeWeatherTheme(theme){
-//                                    MainWeatherComponent(it.data)
+//                            if (prefState != null) {
+//                                ComposeWeatherTheme(prefState.lightTheme) {
+//                                    MainWeatherComponent(liveDataWrap.data)
 //                                }
 //
 //                            }
+//
 //                        }
-//                        is OneCallState.Failure -> {
-//                            setContent {
-//                                LiveDataLoadingComponent()
-//                                Toast.makeText(
-//                                    context,
-//                                    "Please Enable Location Services",
-//                                    Toast.LENGTH_LONG
-//                                ).show()
-//                                Timber.d("OneCallState.Failure")
-//                            }
-//                        }
-//                        is OneCallState.Empty -> {
-//                            Timber.d("OneCallState.Empty")
-//                        }
+//
 //                    }
+//                } else {
+//                    SetContents()
 //                }
 //
 //            }
 
-
-
-//                when(locationState){
-//                    true -> {
-//                        Timber.d("locationState True")
-//                        when (weatherFlow) {
-//                            is OneCallState.Loading -> {
-//                                Timber.d("OneCallState.Loading")
+//            setContent {
 //
-////                                ComposeWeatherTheme(prefState!!.lightTheme) {
-////                                    LiveDataLoadingComponent()
-////                                }
-//                            }
-//                            is OneCallState.Success -> {
-//                                Timber.d("OneCallState.Success")
-//                                val data  = remember { (weatherFlow as OneCallState.Success).data}
-//                                ComposeWeatherTheme(prefState!!.lightTheme){
-//                                    MainWeatherComponent(data)
-//                                }
-//                            }
-//                            is OneCallState.Failure -> {
-//                                ComposeWeatherTheme(prefState!!.lightTheme) {
-//                                    LiveDataLoadingComponent()
-//                                    refreshLocation()
-//                                }
-//                                Timber.d("OneCallState.Failure")
-//                            }
-//                            is OneCallState.Empty -> {
-//                                refreshLocation()
-//                                Timber.d("OneCallState.Empty")
-//                            }
+//                val weatherState by oneCallLiveData.observeAsState(initial = oneCallLiveData.value)
+//                val locationState by locationLiveData.observeAsState(initial = locationLiveData.value)
+//                val prefState by prefLiveData.observeAsState(initial = prefLiveData.value)
+//                val weatherFlow by oneCallFlow.collectAsState()
 //
+//                if (locationState != null) {
+//                    if (locationState == true) {
+//                        Timber.d("locationState isnt null and true")
+//                        refreshLocation()
+//                        if (weatherState != null) {
+//
+//                            Timber.d(prefState.toString() + " prefState")
+//                            ComposeWeatherTheme(prefState!!.lightTheme) {
+//                                Timber.d("path 1")
+//                                MainWeatherComponent(weatherState!!)
+//                            }
+//                        } else {
+//                            ComposeWeatherTheme(false) {
+//                                Timber.d("path 2")
+//                                LiveDataLoadingComponent()
+//                            }
+//                        }
+//                    } else {
+//                        Timber.d("locationState isnt null and false")
+//                        viewModel.getWeather(NYC_LAT, NYC_LON)
+//                        if (weatherState != null) {
+//
+//                            ComposeWeatherTheme(false) {
+//                                Timber.d("path 3")
+//                                MainWeatherComponent(weatherState!!)
+//                            }
+//                        } else {
+//                            ComposeWeatherTheme(false) {
+//                                Timber.d("path 4")
+//                                LiveDataLoadingComponent()
+//                            }
 //                        }
 //                    }
-//                    false -> {
-//                        viewModel.getOneCallFlow(NYC_LAT, NYC_LON)
-//                        Timber.d("locationState False")
-//                        when (weatherFlow) {
-//                            is OneCallState.Loading -> {
-//                                Timber.d("OneCallState.Loading")
-//                                ComposeWeatherTheme(prefState!!.lightTheme) {
-//                                    LiveDataLoadingComponent()
-//                                }
-//                            }
-//                            is OneCallState.Success -> {
-//                                Timber.d("OneCallState.Success")
-//                                val data  = remember { (weatherFlow as OneCallState.Success).data}
-//                                ComposeWeatherTheme(prefState!!.lightTheme){
-//                                    MainWeatherComponent(data)
-//                                }
-//                            }
-//                            is OneCallState.Failure -> {
-//                                ComposeWeatherTheme(prefState!!.lightTheme) {
-//                                    LiveDataLoadingComponent()
-//                                    refreshLocation()
-//                                }
-//                                Timber.d("OneCallState.Failure")
-//                            }
-//                            is OneCallState.Empty -> {
-//                                refreshLocation()
-//                                Timber.d("OneCallState.Empty")
-//                            }
-//
+//                } else {
+//                    Timber.d("locationState is null")
+//                    viewModel.getWeather(NYC_LAT, NYC_LON)
+//                    if (weatherState != null) {
+//                        ComposeWeatherTheme(false) {
+//                            Timber.d("path 5")
+//                            MainWeatherComponent(weatherState!!)
 //                        }
-//                    }
-//                    null -> {
-//                        Timber.d("locationState Null")
-//                        LiveDataLoadingComponent()
+//                    } else {
+//                        ComposeWeatherTheme(false) {
+//                            Timber.d("path 6")
+//                            LiveDataLoadingComponent()
+//                        }
 //                    }
 //                }
-
-
-
+//            }
+//        }
+        }
+    }
 
     @Composable
     fun SetStatusBar() {
@@ -379,7 +329,7 @@ class WeatherFragment : Fragment() {
     @Composable
     fun DailyCard(weatherState: OneCall) {
         val daily = weatherState.daily
-        val offSet = weatherState.offset
+        val offSet = weatherState.offset!!
 
         LazyColumn(modifier = Modifier.fillMaxWidth()) {
             items(daily) { day ->
@@ -648,7 +598,7 @@ class WeatherFragment : Fragment() {
         val humidity = current.humidity
         val clouds = current.clouds
         val windSpeed = current.wind_speed
-        val weather = current.weather.first()
+        //val weather = current.weather.first() ?: Weather("","",0,"")
 
         val rainObject = current.rain ?: Rain(0.0, 0.0)
         val snowObject = current.snow ?: Snow(0.0, 0.0)
@@ -943,7 +893,7 @@ class WeatherFragment : Fragment() {
             ) {
             items(hourly) { hour ->
                 val dt = hour.dt
-                val timestamp = getTimestampFromUnix(dt, offset)
+                val timestamp = getTimestampFromUnix(dt, offset!!)
                 val timestampDay: String = timestamp.substring(0, 3)
                 val dayOfWeek: String = getDayFromUnix(dt, offset)
                 Timber.d(timestamp.toString() + "dtStamp")
@@ -985,7 +935,8 @@ class WeatherFragment : Fragment() {
             requestPermissionLauncher.launch(Manifest.permission.ACCESS_COARSE_LOCATION)
         } else {
             Timber.d("Have permission, refreshing location")
-            locationer = true
+            // locationer = true
+            viewModel.onTriggerEvent(OneCallEvent.UpdateLocation(true))
             fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
                 val lat: Double
                 val lon: Double
@@ -997,8 +948,12 @@ class WeatherFragment : Fragment() {
                     lat = location.latitude
                     lon = location.longitude
                 }
-                viewModel.getWeather(lat.toString(), lon.toString())
-                //viewModel.getOneCallFlow(lat.toString(), lon.toString())
+                viewModel.onTriggerEvent(
+                    OneCallEvent.RefreshWeather(
+                        lat.toString(),
+                        lon.toString()
+                    )
+                )
 
             }
         }

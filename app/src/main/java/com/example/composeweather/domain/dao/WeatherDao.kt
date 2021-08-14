@@ -12,7 +12,7 @@ import com.example.composeweather.domain.model.OneCall
 interface WeatherDao {
 
     @Query("SELECT * FROM OneCall")
-    fun getCurrentOneCall(): OneCall
+    suspend fun getCurrentOneCall(): OneCall
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertOneCall(oneCall : OneCall)

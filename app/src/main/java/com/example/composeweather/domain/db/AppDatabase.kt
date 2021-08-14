@@ -9,7 +9,7 @@ import com.example.composeweather.domain.dao.WeatherDao
 import com.example.composeweather.domain.model.OneCall
 import com.example.composeweather.util.Converters
 
-@Database(entities = [OneCall::class], version = 5, exportSchema = false)
+@Database(entities = [OneCall::class], version = 6, exportSchema = false)
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
 
