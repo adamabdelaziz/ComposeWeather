@@ -27,6 +27,7 @@ import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.rounded.Warning
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
@@ -37,6 +38,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.navigation.compose.navArgument
 import androidx.navigation.fragment.findNavController
 import coil.compose.rememberImagePainter
 import com.example.composeweather.R
@@ -73,6 +75,7 @@ class WeatherFragment : Fragment() {
             registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
                 if (isGranted) {
                     viewModel.onTriggerEvent(OneCallEvent.UpdateLocation(true))
+                    refreshLocation()
                     //locationer = true
                     Timber.d("Permission granted")
                 } else {
@@ -105,16 +108,16 @@ class WeatherFragment : Fragment() {
 
                 val loading = viewModel.loading.value
                 val prefsLoading = viewModel.prefsLoading.value
-                val lat = viewModel.lat.value
-                val lon = viewModel.lon.value
+                //val lat = viewModel.lat.value
+                //val lon = viewModel.lon.value
                 val location = viewModel.location.value
                 val prefs = viewModel.prefs.value
                 val oneCall = viewModel.oneCall.value
-                val celsiusEnabled = viewModel.celsiusEnabled.value
+                //val celsiusEnabled = viewModel.celsiusEnabled.value
 
                 if(location){
                     if (loading || prefsLoading) {
-                        if(prefs!= null &&oneCall!= null){
+                        if(prefs!= null && oneCall!= null){
                             ComposeWeatherTheme(prefs.lightTheme){
                                 MainWeatherComponent(oneCall)
                             }
@@ -133,7 +136,10 @@ class WeatherFragment : Fragment() {
                 }
                 else if(!location){
                     if(prefs != null){
-                       // viewModel.onTriggerEvent(OneCallEvent.RefreshWeather(NYC_LAT, NYC_LON))
+                       viewModel.onTriggerEvent(OneCallEvent.RefreshWeather(NYC_LAT, NYC_LON))
+                    }
+                    else{
+                        LiveDataLoadingComponent()
                     }
 
                 }
@@ -257,7 +263,7 @@ class WeatherFragment : Fragment() {
         //val weather = remember { weatherState }
         val addressList = geocoder.getFromLocation(weatherState.lat, weatherState.lon, 5)
         val title = getTitle(addressList)
-
+        viewModel.oneCall.value = weatherState
 
         SetStatusBar()
         Column(
@@ -619,7 +625,7 @@ class WeatherFragment : Fragment() {
                     // onCloseRequest.
                     openDialog = false
                 },
-                text = { Alert(alerts) },
+                text = { Alert(alerts!!) },
 //                    text = { Column() {
 //                        for (alert in alerts) {
 //                            Text(

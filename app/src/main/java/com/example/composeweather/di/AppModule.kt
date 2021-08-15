@@ -1,8 +1,10 @@
 package com.example.composeweather.di
 
 import android.content.Context
+import android.provider.Telephony
 import com.example.composeweather.domain.dao.WeatherDao
 import com.example.composeweather.domain.db.AppDatabase
+import com.example.composeweather.network.RateInterceptor
 import com.example.composeweather.network.WeatherRemoteDataSource
 import com.example.composeweather.network.WeatherService
 import com.example.composeweather.preference.DataStoreManager
@@ -17,6 +19,8 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import okhttp3.Dispatcher
+import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Singleton
@@ -25,9 +29,22 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object AppModule {
 
+
     @Singleton
     @Provides
-    fun provideRetrofit(gson: Gson): Retrofit = Retrofit.Builder()
+    fun provideNetworkInterceptor(): RateInterceptor = RateInterceptor()
+
+    @Singleton
+    @Provides
+    fun provideOkHttpClient(rateInterceptor: RateInterceptor): OkHttpClient = OkHttpClient()
+        .newBuilder()
+        .addInterceptor(rateInterceptor)
+        .build()
+
+    @Singleton
+    @Provides
+    fun provideRetrofit(gson: Gson, okHttpClient: OkHttpClient): Retrofit = Retrofit.Builder()
+        .client(okHttpClient)
         .baseUrl(BASE_URL)
         .addConverterFactory(GsonConverterFactory.create(gson))
         .build()

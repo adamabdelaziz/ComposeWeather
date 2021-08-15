@@ -76,7 +76,7 @@ class Converters {
     @TypeConverter
     fun stringToAlertList(value: String?): List<Alert>? {
         Timber.d(value + " value")
-        return if (value == "null") {
+        return if (value == null) {
             null
         } else {
             Gson().fromJson(value, Array<Alert>::class.java).toList() ?: emptyList()

@@ -17,6 +17,7 @@ interface WeatherDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertOneCall(oneCall : OneCall)
 
+
     @Query("SELECT * FROM OneCall")
     fun getCurrentOneCallAsLiveData() : LiveData<OneCall>
 }

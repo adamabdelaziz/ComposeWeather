@@ -4,13 +4,8 @@ package com.example.composeweather.ui.weather
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.hilt.Assisted
-import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import com.example.composeweather.domain.model.Current
+import androidx.lifecycle.*
 import com.example.composeweather.domain.model.OneCall
-import com.example.composeweather.domain.model.Rain
-import com.example.composeweather.domain.model.Snow
 import com.example.composeweather.preference.DataStoreManager
 import com.example.composeweather.preference.WeatherPreferences
 import com.example.composeweather.repository.WeatherRepository
@@ -61,10 +56,9 @@ class WeatherViewModel @Inject constructor(
     val prefs: MutableState<WeatherPreferences?> = mutableStateOf(null)
 
     val lightTheme = mutableStateOf(false)
-    val celsiusEnabled = mutableStateOf(false)
+    //val celsiusEnabled = mutableStateOf(false)
 
     val oneCall: MutableState<OneCall?> = mutableStateOf(null)
-
 
     init {
         Timber.d("WeatherViewModel init start")
@@ -97,15 +91,7 @@ class WeatherViewModel @Inject constructor(
                     lon.value = event.lon
                     Timber.d("onTriggerEvent RefreshWeather")
                     getPrefs()
-                    val localCall = repository.getLatestOneCall()
-
-                    if (localCall != null) {
-                        oneCall.value = localCall
-                    } else {
-                        Timber.d("localCall is null")
-                        getWeather()
-                    }
-
+                    getWeather()
                 }
                 is RestoreStateEvent -> {
                     Timber.d("onTriggerEvent RestoreStateEvent")
@@ -123,8 +109,17 @@ class WeatherViewModel @Inject constructor(
 
     private suspend fun restoreScreen() {
         loading.value = true
-        oneCall.value = repository.getLatestOneCall()
-        loading.value = false
+        val celsiusEnabled = preferencesFlow.first().celsiusEnabled
+        if (celsiusEnabled){
+            oneCall.value = repository.getCorrectOneCall(lat.value, lon.value, CELSIUS)
+            loading.value = false
+        }else
+        {
+            oneCall.value = repository.getCorrectOneCall(lat.value, lon.value, FAHRENHEIT)
+            loading.value = false
+        }
+
+
     }
 
     private suspend fun getWeather() {
@@ -139,16 +134,17 @@ class WeatherViewModel @Inject constructor(
 //        )
 //        oneCall.value =cringeCall
 //        repository.insertOneCall(cringeCall)
+        //val celsiusEnabled = prefs.value!!.celsiusEnabled
 
-        val celsiusEnabled = prefs.value!!.celsiusEnabled
-        if (celsiusEnabled) {
-            oneCall.value = repository.getOneCall(lat.value, lon.value, CELSIUS)
+        val weatherPreferences = preferencesFlow.first()
+        if (weatherPreferences.celsiusEnabled) {
+            oneCall.value = repository.getCorrectOneCall(lat.value, lon.value, CELSIUS)
             loading.value = false
         } else {
-            oneCall.value = repository.getOneCall(lat.value, lon.value, FAHRENHEIT)
+            oneCall.value = repository.getCorrectOneCall(lat.value, lon.value, FAHRENHEIT)
             loading.value = false
         }
-        loading.value =false
+        //loading.value =false
     }
 
     private suspend fun updateDataStoreLocation(locationSetting: Boolean) {
@@ -177,7 +173,7 @@ class WeatherViewModel @Inject constructor(
             location.value = locationFlow.first()
             prefs.value = preferencesFlow.first()
             lightTheme.value = preferencesFlow.first().lightTheme
-            celsiusEnabled.value = preferencesFlow.first().celsiusEnabled
+            //celsiusEnabled.value = preferencesFlow.first().celsiusEnabled
             prefsLoading.value = false
         }
     }

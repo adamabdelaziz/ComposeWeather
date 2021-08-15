@@ -19,6 +19,8 @@ const val FAHRENHEIT: String = "IMPERIAL"
 
 const val CELSIUS: String = "METRIC"
 
+const val HOUR_IN_MILLISECONDS : Long = 3600000
+
 //const val NYC_LAT = 40.7131.toString()
 //
 //const val NYC_LON = (-74.0072).toString()
