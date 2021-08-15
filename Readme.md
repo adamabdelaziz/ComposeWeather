@@ -15,7 +15,9 @@ DI with Hilt
 
 Retrofit
 
-Timber for 
+Timber 
+
+Room
 
 Jetpack Datastore
 
