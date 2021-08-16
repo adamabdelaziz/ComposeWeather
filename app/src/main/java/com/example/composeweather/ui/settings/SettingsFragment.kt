@@ -14,6 +14,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -21,6 +22,9 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.example.composeweather.R
 import com.example.composeweather.preference.WeatherPreferences
+import com.example.composeweather.ui.common.Dimensions
+import com.example.composeweather.ui.common.regularDimensions
+import com.example.composeweather.ui.common.smallDimensions
 import com.example.composeweather.ui.theme.ComposeWeatherTheme
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import dagger.hilt.android.AndroidEntryPoint
@@ -32,7 +36,7 @@ import timber.log.Timber
 class SettingsFragment : Fragment() {
 
     private val settingsViewModel: SettingsViewModel by viewModels()
-
+    private lateinit var dimensions: Dimensions
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,19 +52,20 @@ class SettingsFragment : Fragment() {
             val prefLiveData = settingsViewModel.prefs
 //            val prefFlow = settingsViewModel.preferencesFlow
             setContent {
-
+                val configuration = LocalConfiguration.current
+                dimensions = if (configuration.densityDpi >= 420) smallDimensions else regularDimensions
                 val prefs by prefLiveData.observeAsState(initial = prefLiveData.value)
 //                val prefFlows by prefFlow.collectAsState(initial = prefFlow.first())
 
                 if (prefs != null) {
                     val lightTheme = prefs!!.lightTheme
                     Timber.d(prefs.toString() + " weatherPreferences not null")
-                    ComposeWeatherTheme(lightTheme) {
+                    ComposeWeatherTheme(lightTheme,dimensions) {
                         SettingsScreen(prefs!!)
                     }
                 } else {
                     Timber.d(prefs.toString() + " weatherPreferences null")
-                    ComposeWeatherTheme(false) {
+                    ComposeWeatherTheme(false,dimensions) {
                         LiveDataLoadingComponent()
                     }
                 }

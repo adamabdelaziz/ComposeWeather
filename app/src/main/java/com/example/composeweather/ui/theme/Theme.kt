@@ -4,9 +4,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalConfiguration
 import com.example.composeweather.ui.common.Dimensions
-import com.example.composeweather.ui.common.regularDimensions
 import com.example.composeweather.ui.common.smallDimensions
 
 private val DarkColorPalette = darkColors(
@@ -20,7 +18,7 @@ private val DarkColorPalette = darkColors(
     surface = surfaceDark,
 
 
-)
+    )
 
 private val LightColorPalette = lightColors(
     primary = primaryLight,
@@ -31,7 +29,6 @@ private val LightColorPalette = lightColors(
     onSurface = Black,
     background = backgroundLight,
     surface = surfaceLight,
-
 
 
     /* Other default colors to override
@@ -47,7 +44,8 @@ private val LightColorPalette = lightColors(
 @Composable
 fun ComposeWeatherTheme(
     lightTheme: Boolean,
-    content: @Composable() () -> Unit
+    dimensions: Dimensions,
+    content: @Composable() () -> Unit,
 ) {
 
 
@@ -56,10 +54,19 @@ fun ComposeWeatherTheme(
     } else {
         DarkColorPalette
     }
-    val typography = if(lightTheme){
-        Typography
-    }else{
-        TypographyDark
+    val typography = if (lightTheme) {
+        if (dimensions == smallDimensions) {
+            smallTypography
+        } else {
+            Typography
+        }
+    } else {
+        if(dimensions == smallDimensions){
+            smallTypographyDark
+        }else{
+            TypographyDark
+        }
+
     }
 
     MaterialTheme(

@@ -108,8 +108,8 @@ class WeatherFragment : Fragment() {
 
             setContent {
                 val configuration = LocalConfiguration.current
-
-                dimensions = if(configuration.screenHeightDp <= 360) smallDimensions else regularDimensions
+                dimensions = if (configuration.densityDpi >= 420) smallDimensions else regularDimensions
+                //dimensions = if(configuration.screenHeightDp <= 360) smallDimensions else regularDimensions
                 Timber.d(configuration.screenHeightDp.toString() + " screenHeight configuration")
                 Timber.d(dimensions.toString() + " dimensions configuration")
                 Timber.d(configuration.screenWidthDp.toString() + " screenWidth configuration")
@@ -124,7 +124,7 @@ class WeatherFragment : Fragment() {
                 if (location) {
                     if (loading || prefsLoading) {
                         if (prefs != null && oneCall != null) {
-                            ComposeWeatherTheme(prefs.lightTheme) {
+                            ComposeWeatherTheme(prefs.lightTheme, dimensions) {
                                 MainWeatherComponent(oneCall)
                             }
                         } else {
@@ -132,7 +132,7 @@ class WeatherFragment : Fragment() {
                         }
                     } else if (!loading && !prefsLoading) {
                         if (prefs != null && oneCall != null) {
-                            ComposeWeatherTheme(prefs.lightTheme) {
+                            ComposeWeatherTheme(prefs.lightTheme, dimensions) {
                                 MainWeatherComponent(oneCall)
                             }
                         }
@@ -224,7 +224,12 @@ class WeatherFragment : Fragment() {
                 Text(
                     text = cityName,
                     style = MaterialTheme.typography.h4,
-                    modifier = Modifier.padding(dimensions.zero,dimensions.zero,dimensions.zero,dimensions.eight)
+                    modifier = Modifier.padding(
+                        dimensions.zero,
+                        dimensions.zero,
+                        dimensions.zero,
+                        dimensions.eight
+                    )
                 )
             },
             backgroundColor = MaterialTheme.colors.primary,
@@ -286,7 +291,12 @@ class WeatherFragment : Fragment() {
         //Timber.d(icon + "   ICON LINK")
 
         Card(modifier = Modifier.fillMaxWidth()
-            .padding(start = dimensions.sixteen, end = dimensions.sixteen, bottom = dimensions.eight, top = dimensions.eight).animateContentSize(),
+            .padding(
+                start = dimensions.sixteen,
+                end = dimensions.sixteen,
+                bottom = dimensions.eight,
+                top = dimensions.eight
+            ).animateContentSize(),
             shape = RoundedCornerShape(dimensions.twenty),
             onClick = {
                 expanded = !expanded
@@ -339,7 +349,8 @@ class WeatherFragment : Fragment() {
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Column(
-                            modifier = Modifier.padding(dimensions.eight, dimensions.four).weight(1.0f),
+                            modifier = Modifier.padding(dimensions.eight, dimensions.four)
+                                .weight(1.0f),
                             horizontalAlignment = Alignment.CenterHorizontally
                         )
                         {
@@ -357,7 +368,8 @@ class WeatherFragment : Fragment() {
                                 )
                         }
                         Column(
-                            modifier = Modifier.padding(dimensions.eight, dimensions.four).weight(1.0f),
+                            modifier = Modifier.padding(dimensions.eight, dimensions.four)
+                                .weight(1.0f),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Text(
@@ -370,7 +382,8 @@ class WeatherFragment : Fragment() {
                             )
                         }
                         Column(
-                            modifier = Modifier.padding(dimensions.eight, dimensions.four).weight(1.0f),
+                            modifier = Modifier.padding(dimensions.eight, dimensions.four)
+                                .weight(1.0f),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Text(
@@ -383,7 +396,8 @@ class WeatherFragment : Fragment() {
                             )
                         }
                         Column(
-                            modifier = Modifier.padding(dimensions.eight, dimensions.four).weight(1.0f),
+                            modifier = Modifier.padding(dimensions.eight, dimensions.four)
+                                .weight(1.0f),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Text(
@@ -406,7 +420,8 @@ class WeatherFragment : Fragment() {
                     {
                         if (rain > 0.0) {
                             Column(
-                                modifier = Modifier.padding(dimensions.eight, dimensions.four).weight(1.0f),
+                                modifier = Modifier.padding(dimensions.eight, dimensions.four)
+                                    .weight(1.0f),
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
                                 Image(
@@ -429,7 +444,8 @@ class WeatherFragment : Fragment() {
                         }
                         if (snow > 0.0) {
                             Column(
-                                modifier = Modifier.padding(dimensions.eight, dimensions.four).weight(1.0f),
+                                modifier = Modifier.padding(dimensions.eight, dimensions.four)
+                                    .weight(1.0f),
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
 
@@ -455,7 +471,8 @@ class WeatherFragment : Fragment() {
                         if (pop > 0.0) {
 
                             Column(
-                                modifier = Modifier.padding(dimensions.eight, dimensions.four).weight(1.0f),
+                                modifier = Modifier.padding(dimensions.eight, dimensions.four)
+                                    .weight(1.0f),
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
                                 Image(
@@ -713,7 +730,8 @@ class WeatherFragment : Fragment() {
                         Icons.Rounded.Warning,
                         tint = MaterialTheme.colors.secondary,
                         contentDescription = "warning",
-                        modifier = Modifier.clickable { openDialog = true }.size(dimensions.sixtyfour)
+                        modifier = Modifier.clickable { openDialog = true }
+                            .size(dimensions.sixtyfour)
                             .padding(dimensions.eight),
                     )
 
@@ -754,7 +772,12 @@ class WeatherFragment : Fragment() {
 
         Column(
             modifier = Modifier
-                .padding(start = dimensions.eight, top = dimensions.zero, bottom = dimensions.zero, end = dimensions.eight),
+                .padding(
+                    start = dimensions.eight,
+                    top = dimensions.zero,
+                    bottom = dimensions.zero,
+                    end = dimensions.eight
+                ),
             verticalArrangement = Arrangement.SpaceEvenly,
             horizontalAlignment = Alignment.CenterHorizontally,
 
@@ -812,7 +835,12 @@ class WeatherFragment : Fragment() {
 //        ) {
         LazyRow(
             modifier = Modifier.fillMaxWidth()
-                .padding(start = dimensions.eight, end = dimensions.eight, bottom = dimensions.twentyfour, top = dimensions.eight),
+                .padding(
+                    start = dimensions.eight,
+                    end = dimensions.eight,
+                    bottom = dimensions.twentyfour,
+                    top = dimensions.eight
+                ),
 
             ) {
             items(hourly) { hour ->
