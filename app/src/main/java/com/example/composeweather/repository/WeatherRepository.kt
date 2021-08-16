@@ -49,14 +49,19 @@ class WeatherRepository @Inject constructor(
                 return getRemoteOneCall(lat, lon, unit)
             } else {
                 //user didnt switch units and has data from before
-                val localOneCallTime = localCall.current.dt.toLong()
+                val localOneCallTime = localCall.current.dt.times(1000)
                 val currentTime = System.currentTimeMillis()
-
-                if (currentTime.minus(HOUR_IN_MILLISECONDS) > localOneCallTime) {
-                    //Data is less than an hour old
+                Timber.d("$localOneCallTime is localOneCallTime RepositoryValue")
+                Timber.d("$currentTime is currentTime RepositoryValue")
+                val diff = currentTime.minus(localOneCallTime)
+                Timber.d("$diff is diff RepositoryValue")
+                if (diff < HOUR_IN_MILLISECONDS) {
+                    //Data is within the hour
+                    Timber.d("Data within the hour RepositoryValue")
                     return localCall
                 } else {
-                    //Data older than an hour so get new data
+                    //Data is older than an hour
+                    Timber.d("Data older than one hour RepositoryValue")
                     return getRemoteOneCall(lat, lon, unit)
                 }
             }

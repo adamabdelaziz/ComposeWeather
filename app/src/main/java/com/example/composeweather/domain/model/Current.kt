@@ -3,7 +3,7 @@ package com.example.composeweather.domain.model
 data class Current(
     val clouds: Double,
     val dew_point: Double,
-    val dt: Double,
+    val dt: Long,
     val feels_like: Double,
     val humidity: Double,
     val pressure: Double,
