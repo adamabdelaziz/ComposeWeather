@@ -4,6 +4,10 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalConfiguration
+import com.example.composeweather.ui.common.Dimensions
+import com.example.composeweather.ui.common.regularDimensions
+import com.example.composeweather.ui.common.smallDimensions
 
 private val DarkColorPalette = darkColors(
     primary = primaryDark,
@@ -45,6 +49,7 @@ fun ComposeWeatherTheme(
     lightTheme: Boolean,
     content: @Composable() () -> Unit
 ) {
+
 
     val colors = if (lightTheme) {
         LightColorPalette

@@ -4,6 +4,8 @@ import com.example.composeweather.domain.dao.WeatherDao
 import com.example.composeweather.domain.model.OneCall
 import com.example.composeweather.network.WeatherRemoteDataSource
 import com.example.composeweather.util.HOUR_IN_MILLISECONDS
+import com.example.composeweather.util.NYC_LAT
+import com.example.composeweather.util.NYC_LON
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -43,9 +45,11 @@ class WeatherRepository @Inject constructor(
         if (localCall != null) {
             val localUnit = localCall.unit
             Timber.d(localUnit + " localUnit RepositoryValue")
-            if (unit != localUnit) {
-                //User switched units
-
+            if (unit != localUnit || localCall.lat.toString() == NYC_LAT || localCall.lat.toString() == NYC_LON) {
+                //User switched units or just granted permissions
+                Timber.d(localCall.lat.toString() + "localCallLat RepositoryValue")
+                Timber.d(localCall.lon.toString() + "localCallLon RepositoryValue")
+                Timber.d("New units or location just enabled RepositoryValue")
                 return getRemoteOneCall(lat, lon, unit)
             } else {
                 //user didnt switch units and has data from before

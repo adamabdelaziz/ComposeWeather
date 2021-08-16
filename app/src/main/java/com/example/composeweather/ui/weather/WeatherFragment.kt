@@ -27,22 +27,24 @@ import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.rounded.Warning
 import androidx.compose.runtime.*
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.navigation.compose.navArgument
 import androidx.navigation.fragment.findNavController
 import coil.compose.rememberImagePainter
 import com.example.composeweather.R
 import com.example.composeweather.domain.model.*
+import com.example.composeweather.ui.common.Dimensions
+import com.example.composeweather.ui.common.regularDimensions
+import com.example.composeweather.ui.common.smallDimensions
 import com.example.composeweather.ui.theme.ComposeWeatherTheme
 import com.example.composeweather.util.*
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
@@ -58,12 +60,12 @@ import kotlin.math.roundToInt
 class WeatherFragment : Fragment() {
 
     private val viewModel: WeatherViewModel by viewModels()
-    //private val settingsViewModel: SettingsViewModel by viewModels()
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var requestPermissionLauncher: ActivityResultLauncher<String>
     private lateinit var geocoder: Geocoder
-    private var locationer = false
+    private lateinit var dimensions: Dimensions
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -76,7 +78,6 @@ class WeatherFragment : Fragment() {
                 if (isGranted) {
                     viewModel.onTriggerEvent(OneCallEvent.UpdateLocation(true))
                     refreshLocation()
-                    //locationer = true
                     Timber.d("Permission granted")
                 } else {
                     //Probably
@@ -100,145 +101,53 @@ class WeatherFragment : Fragment() {
     ): View {
         Timber.d("onCreateViewZ called in WeatherFragment")
         refreshLocation()
+
         return ComposeView(requireContext()).apply {
 
             Timber.d("onCreateView called in WeatherFragment")
 
             setContent {
+                val configuration = LocalConfiguration.current
 
+                dimensions = if(configuration.screenHeightDp <= 360) smallDimensions else regularDimensions
+                Timber.d(configuration.screenHeightDp.toString() + " screenHeight configuration")
+                Timber.d(dimensions.toString() + " dimensions configuration")
+                Timber.d(configuration.screenWidthDp.toString() + " screenWidth configuration")
+                //Will probably have to base it on DPI
+                Timber.d(configuration.densityDpi.toString() + " density configuration")
                 val loading = viewModel.loading.value
                 val prefsLoading = viewModel.prefsLoading.value
-                //val lat = viewModel.lat.value
-                //val lon = viewModel.lon.value
                 val location = viewModel.location.value
                 val prefs = viewModel.prefs.value
                 val oneCall = viewModel.oneCall.value
-                //val celsiusEnabled = viewModel.celsiusEnabled.value
 
-                if(location){
+                if (location) {
                     if (loading || prefsLoading) {
-                        if(prefs!= null && oneCall!= null){
-                            ComposeWeatherTheme(prefs.lightTheme){
+                        if (prefs != null && oneCall != null) {
+                            ComposeWeatherTheme(prefs.lightTheme) {
                                 MainWeatherComponent(oneCall)
                             }
-                        }else{
+                        } else {
                             LiveDataLoadingComponent()
                         }
-
-                    }
-                    else if(!loading && !prefsLoading){
-                        if(prefs != null && oneCall != null){
-                            ComposeWeatherTheme(prefs.lightTheme){
+                    } else if (!loading && !prefsLoading) {
+                        if (prefs != null && oneCall != null) {
+                            ComposeWeatherTheme(prefs.lightTheme) {
                                 MainWeatherComponent(oneCall)
                             }
                         }
                     }
-                }
-                else if(!location){
-                    if(prefs != null){
-                       viewModel.onTriggerEvent(OneCallEvent.RefreshWeather(NYC_LAT, NYC_LON))
-                    }
-                    else{
+                } else if (!location) {
+                    if (prefs != null) {
+                        viewModel.onTriggerEvent(OneCallEvent.RefreshWeather(NYC_LAT, NYC_LON))
+                    } else {
                         LiveDataLoadingComponent()
                     }
 
                 }
 
             }
-//            setContent {
-//                val liveDataWrap = viewModel.weatherLiveDataWrap.observeAsState().value
-//                val prefState = viewModel.prefs.observeAsState().value
-//                val locationState = viewModel.location.observeAsState().value
-//
-//                if (locationState == true) {
-//                    when (liveDataWrap) {
-//                        is OneCallState.Empty -> {
-//                            Timber.d("Empty")
-//                        }
-//                        is OneCallState.Failure -> {
-//                            Timber.d("Failure")
-//                        }
-//                        is OneCallState.Loading -> {
-//                            if (prefState != null) {
-//                                ComposeWeatherTheme(prefState.lightTheme) {
-//                                    LiveDataLoadingComponent()
-//                                }
-//                            }
-//                        }
-//                        is OneCallState.Success -> {
-//                            if (prefState != null) {
-//                                ComposeWeatherTheme(prefState.lightTheme) {
-//                                    MainWeatherComponent(liveDataWrap.data)
-//                                }
-//
-//                            }
-//
-//                        }
-//
-//                    }
-//                } else {
-//                    SetContents()
-//                }
-//
-//            }
 
-//            setContent {
-//
-//                val weatherState by oneCallLiveData.observeAsState(initial = oneCallLiveData.value)
-//                val locationState by locationLiveData.observeAsState(initial = locationLiveData.value)
-//                val prefState by prefLiveData.observeAsState(initial = prefLiveData.value)
-//                val weatherFlow by oneCallFlow.collectAsState()
-//
-//                if (locationState != null) {
-//                    if (locationState == true) {
-//                        Timber.d("locationState isnt null and true")
-//                        refreshLocation()
-//                        if (weatherState != null) {
-//
-//                            Timber.d(prefState.toString() + " prefState")
-//                            ComposeWeatherTheme(prefState!!.lightTheme) {
-//                                Timber.d("path 1")
-//                                MainWeatherComponent(weatherState!!)
-//                            }
-//                        } else {
-//                            ComposeWeatherTheme(false) {
-//                                Timber.d("path 2")
-//                                LiveDataLoadingComponent()
-//                            }
-//                        }
-//                    } else {
-//                        Timber.d("locationState isnt null and false")
-//                        viewModel.getWeather(NYC_LAT, NYC_LON)
-//                        if (weatherState != null) {
-//
-//                            ComposeWeatherTheme(false) {
-//                                Timber.d("path 3")
-//                                MainWeatherComponent(weatherState!!)
-//                            }
-//                        } else {
-//                            ComposeWeatherTheme(false) {
-//                                Timber.d("path 4")
-//                                LiveDataLoadingComponent()
-//                            }
-//                        }
-//                    }
-//                } else {
-//                    Timber.d("locationState is null")
-//                    viewModel.getWeather(NYC_LAT, NYC_LON)
-//                    if (weatherState != null) {
-//                        ComposeWeatherTheme(false) {
-//                            Timber.d("path 5")
-//                            MainWeatherComponent(weatherState!!)
-//                        }
-//                    } else {
-//                        ComposeWeatherTheme(false) {
-//                            Timber.d("path 6")
-//                            LiveDataLoadingComponent()
-//                        }
-//                    }
-//                }
-//            }
-//        }
         }
     }
 
@@ -256,6 +165,15 @@ class WeatherFragment : Fragment() {
             )
         }
     }
+
+//    @Composable
+//    fun ProvideDimensions(
+//        dimensions: Dimensions,
+//        content: @Composable () -> Unit
+//    ) {
+//        val dimensionSet = remember { dimensions }
+//        CompositionLocalProvider(LocalAppDimens provides dimensionSet, content = content)
+//    }
 
     @Composable
     fun MainWeatherComponent(weatherState: OneCall) {
@@ -278,7 +196,7 @@ class WeatherFragment : Fragment() {
             HourlyCard(weatherState)
             DailyCard(weatherState)
             Spacer(
-                modifier = Modifier.height(16.dp)
+                modifier = Modifier.height(dimensions.sixteen)
             )
 
         }
@@ -306,7 +224,7 @@ class WeatherFragment : Fragment() {
                 Text(
                     text = cityName,
                     style = MaterialTheme.typography.h4,
-                    modifier = Modifier.padding(0.dp, 0.dp, 0.dp, 8.dp)
+                    modifier = Modifier.padding(dimensions.zero,dimensions.zero,dimensions.zero,dimensions.eight)
                 )
             },
             backgroundColor = MaterialTheme.colors.primary,
@@ -368,15 +286,15 @@ class WeatherFragment : Fragment() {
         //Timber.d(icon + "   ICON LINK")
 
         Card(modifier = Modifier.fillMaxWidth()
-            .padding(start = 16.dp, end = 16.dp, bottom = 8.dp, top = 8.dp).animateContentSize(),
-            shape = RoundedCornerShape(20.dp),
+            .padding(start = dimensions.sixteen, end = dimensions.sixteen, bottom = dimensions.eight, top = dimensions.eight).animateContentSize(),
+            shape = RoundedCornerShape(dimensions.twenty),
             onClick = {
                 expanded = !expanded
                 //Timber.d(expanded.toString())
             }) {
             Column() {
                 Row(
-                    modifier = Modifier.fillMaxWidth().padding(8.dp),
+                    modifier = Modifier.fillMaxWidth().padding(dimensions.eight),
                     horizontalArrangement = Arrangement.Start,
                     verticalAlignment = Alignment.CenterVertically,
 
@@ -384,17 +302,17 @@ class WeatherFragment : Fragment() {
                     Text(
                         text = getDayFromUnix(day.dt, offset),
                         style = MaterialTheme.typography.h4,
-                        modifier = Modifier.padding(8.dp, 4.dp),
+                        modifier = Modifier.padding(dimensions.eight, dimensions.four),
                         //fontSize = 24.sp,
 
                     )
                     Image(
                         painter = rememberImagePainter(icon),
                         contentDescription = stringResource(R.string.rain_icon_description),
-                        modifier = Modifier.size(64.dp).padding(8.dp, 4.dp)
+                        modifier = Modifier.size(64.dp).padding(dimensions.eight, dimensions.four)
                     )
                     Row(
-                        modifier = Modifier.fillMaxWidth().padding(8.dp),
+                        modifier = Modifier.fillMaxWidth().padding(dimensions.eight),
                         horizontalArrangement = Arrangement.End,
                         verticalAlignment = Alignment.CenterVertically,
                     )
@@ -402,26 +320,26 @@ class WeatherFragment : Fragment() {
                         Text(
                             style = MaterialTheme.typography.h4,
                             text = "$low$DEGREE_SYMBOL",
-                            modifier = Modifier.padding(8.dp, 4.dp),
+                            modifier = Modifier.padding(dimensions.eight, dimensions.four),
 
 
                             )
                         Text(
                             style = MaterialTheme.typography.h4,
                             text = "$high$DEGREE_SYMBOL",
-                            modifier = Modifier.padding(8.dp, 4.dp),
+                            modifier = Modifier.padding(dimensions.eight, dimensions.four),
                         )
                     }
                 }
                 if (expanded) {
                     //Specific Temp row. Columns used to stack the elements evenly
                     Row(
-                        modifier = Modifier.fillMaxWidth().padding(8.dp),
+                        modifier = Modifier.fillMaxWidth().padding(dimensions.eight),
                         horizontalArrangement = Arrangement.Start,
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Column(
-                            modifier = Modifier.padding(8.dp, 4.dp).weight(1.0f),
+                            modifier = Modifier.padding(dimensions.eight, dimensions.four).weight(1.0f),
                             horizontalAlignment = Alignment.CenterHorizontally
                         )
                         {
@@ -439,7 +357,7 @@ class WeatherFragment : Fragment() {
                                 )
                         }
                         Column(
-                            modifier = Modifier.padding(8.dp, 4.dp).weight(1.0f),
+                            modifier = Modifier.padding(dimensions.eight, dimensions.four).weight(1.0f),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Text(
@@ -452,7 +370,7 @@ class WeatherFragment : Fragment() {
                             )
                         }
                         Column(
-                            modifier = Modifier.padding(8.dp, 4.dp).weight(1.0f),
+                            modifier = Modifier.padding(dimensions.eight, dimensions.four).weight(1.0f),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Text(
@@ -465,7 +383,7 @@ class WeatherFragment : Fragment() {
                             )
                         }
                         Column(
-                            modifier = Modifier.padding(8.dp, 4.dp).weight(1.0f),
+                            modifier = Modifier.padding(dimensions.eight, dimensions.four).weight(1.0f),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Text(
@@ -481,14 +399,14 @@ class WeatherFragment : Fragment() {
                     }
                     //This will be the other types of things like rainfall/snowfall etc
                     Row(
-                        modifier = Modifier.fillMaxWidth().padding(8.dp),
+                        modifier = Modifier.fillMaxWidth().padding(dimensions.eight),
                         horizontalArrangement = Arrangement.Start,
                         verticalAlignment = Alignment.CenterVertically,
                     )
                     {
                         if (rain > 0.0) {
                             Column(
-                                modifier = Modifier.padding(8.dp, 4.dp).weight(1.0f),
+                                modifier = Modifier.padding(dimensions.eight, dimensions.four).weight(1.0f),
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
                                 Image(
@@ -500,18 +418,18 @@ class WeatherFragment : Fragment() {
                                             R.string.rain_icon_description,
                                             Toast.LENGTH_SHORT
                                         ).show()
-                                    }).size(64.dp)
+                                    }).size(dimensions.sixtyfour)
                                 )
                                 Text(
                                     style = MaterialTheme.typography.h5,
                                     text = "${toInches(rain)} in.",
-                                    modifier = Modifier.padding(4.dp),
+                                    modifier = Modifier.padding(dimensions.four),
                                 )
                             }
                         }
                         if (snow > 0.0) {
                             Column(
-                                modifier = Modifier.padding(8.dp, 4.dp).weight(1.0f),
+                                modifier = Modifier.padding(dimensions.eight, dimensions.four).weight(1.0f),
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
 
@@ -524,12 +442,12 @@ class WeatherFragment : Fragment() {
                                             R.string.snow_icon_description,
                                             Toast.LENGTH_SHORT
                                         ).show()
-                                    }).size(64.dp)
+                                    }).size(dimensions.sixtyfour)
                                 )
                                 Text(
                                     style = MaterialTheme.typography.h5,
                                     text = "${toInches(snow)} in.",
-                                    modifier = Modifier.padding(4.dp),
+                                    modifier = Modifier.padding(dimensions.four),
 
                                     )
                             }
@@ -537,7 +455,7 @@ class WeatherFragment : Fragment() {
                         if (pop > 0.0) {
 
                             Column(
-                                modifier = Modifier.padding(8.dp, 4.dp).weight(1.0f),
+                                modifier = Modifier.padding(dimensions.eight, dimensions.four).weight(1.0f),
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
                                 Image(
@@ -549,12 +467,12 @@ class WeatherFragment : Fragment() {
                                             R.string.pop_icon_description,
                                             Toast.LENGTH_SHORT
                                         ).show()
-                                    }).size(64.dp)
+                                    }).size(dimensions.sixtyfour)
                                 )
                                 Text(
                                     style = MaterialTheme.typography.h5,
                                     text = "${pop.roundTo(2)} %",
-                                    modifier = Modifier.padding(4.dp),
+                                    modifier = Modifier.padding(dimensions.four),
                                 )
                             }
                         }
@@ -578,7 +496,7 @@ class WeatherFragment : Fragment() {
                     text = alert.description,
                     fontSize = 16.sp
                 )
-                Spacer(modifier = Modifier.size(8.dp))
+                Spacer(modifier = Modifier.size(dimensions.eight))
             }
         }
 
@@ -666,12 +584,12 @@ class WeatherFragment : Fragment() {
 //        ) {
         Column(
             //Column modifiers go here
-            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            modifier = Modifier.fillMaxWidth().padding(dimensions.sixteen),
 
             ) {
             Text(
                 text = "$temp$DEGREE_SYMBOL",
-                modifier = Modifier.align(CenterHorizontally).padding(8.dp),
+                modifier = Modifier.align(CenterHorizontally).padding(dimensions.eight),
                 fontSize = 64.sp,
 
                 )
@@ -699,12 +617,12 @@ class WeatherFragment : Fragment() {
                                 R.string.rain_icon_description,
                                 Toast.LENGTH_SHORT
                             ).show()
-                        }).size(64.dp)
+                        }).size(dimensions.sixtyfour)
                     )
                     Text(
                         style = MaterialTheme.typography.h5,
                         text = "${toInches(rain)} in.",
-                        modifier = Modifier.padding(4.dp),
+                        modifier = Modifier.padding(dimensions.four),
                     )
                 }
                 if (snow > 0.0) {
@@ -717,12 +635,12 @@ class WeatherFragment : Fragment() {
                                 R.string.snow_icon_description,
                                 Toast.LENGTH_SHORT
                             ).show()
-                        }).size(64.dp)
+                        }).size(dimensions.sixtyfour)
                     )
                     Text(
                         style = MaterialTheme.typography.h5,
                         text = "${toInches(snow)} in.",
-                        modifier = Modifier.padding(4.dp),
+                        modifier = Modifier.padding(dimensions.four),
 
                         )
                 }
@@ -737,7 +655,7 @@ class WeatherFragment : Fragment() {
                                     R.string.cloud_icon_description,
                                     Toast.LENGTH_SHORT
                                 ).show()
-                            }).size(64.dp)
+                            }).size(dimensions.sixtyfour)
                         )
                     }
                     in 25..50 -> {
@@ -750,7 +668,7 @@ class WeatherFragment : Fragment() {
                                     R.string.cloud_icon_description,
                                     Toast.LENGTH_SHORT
                                 ).show()
-                            }).size(64.dp)
+                            }).size(dimensions.sixtyfour)
                         )
                     }
                     in 50..100 -> {
@@ -763,7 +681,7 @@ class WeatherFragment : Fragment() {
                                     R.string.cloud_icon_description,
                                     Toast.LENGTH_SHORT
                                 ).show()
-                            }).size(64.dp)
+                            }).size(dimensions.sixtyfour)
 
                         )
                     }
@@ -771,7 +689,7 @@ class WeatherFragment : Fragment() {
                 Text(
                     style = MaterialTheme.typography.h5,
                     text = "$clouds%",
-                    modifier = Modifier.padding(8.dp),
+                    modifier = Modifier.padding(dimensions.eight),
                 )
                 Image(
                     painter = rememberImagePainter(R.drawable.humidity200xx),
@@ -782,12 +700,12 @@ class WeatherFragment : Fragment() {
                             R.string.humidity_icon_description,
                             Toast.LENGTH_SHORT
                         ).show()
-                    }).size(64.dp)
+                    }).size(dimensions.sixtyfour)
                 )
                 Text(
                     style = MaterialTheme.typography.h5,
                     text = "$humidity%",
-                    modifier = Modifier.padding(8.dp),
+                    modifier = Modifier.padding(dimensions.eight),
                 )
 
                 if (!alerts.isNullOrEmpty()) {
@@ -795,8 +713,8 @@ class WeatherFragment : Fragment() {
                         Icons.Rounded.Warning,
                         tint = MaterialTheme.colors.secondary,
                         contentDescription = "warning",
-                        modifier = Modifier.clickable { openDialog = true }.size(64.dp)
-                            .padding(8.dp),
+                        modifier = Modifier.clickable { openDialog = true }.size(dimensions.sixtyfour)
+                            .padding(dimensions.eight),
                     )
 
 //                        Image(
@@ -836,7 +754,7 @@ class WeatherFragment : Fragment() {
 
         Column(
             modifier = Modifier
-                .padding(start = 8.dp, top = 0.dp, bottom = 0.dp, end = 8.dp),
+                .padding(start = dimensions.eight, top = dimensions.zero, bottom = dimensions.zero, end = dimensions.eight),
             verticalArrangement = Arrangement.SpaceEvenly,
             horizontalAlignment = Alignment.CenterHorizontally,
 
@@ -862,7 +780,7 @@ class WeatherFragment : Fragment() {
             Image(
                 painter = rememberImagePainter(icon),
                 contentDescription = stringResource(R.string.rain_icon_description),
-                modifier = Modifier.size(96.dp)
+                modifier = Modifier.size(dimensions.bigImage)
                 //.padding(8.dp,4.dp)
             )
             Text(
@@ -894,7 +812,7 @@ class WeatherFragment : Fragment() {
 //        ) {
         LazyRow(
             modifier = Modifier.fillMaxWidth()
-                .padding(start = 8.dp, end = 8.dp, bottom = 24.dp, top = 8.dp),
+                .padding(start = dimensions.eight, end = dimensions.eight, bottom = dimensions.twentyfour, top = dimensions.eight),
 
             ) {
             items(hourly) { hour ->
@@ -971,6 +889,7 @@ class WeatherFragment : Fragment() {
         val navController = findNavController()
         navController.navigate(R.id.action_weatherFragment_to_settingsFragment)
     }
+
 
 }
 
