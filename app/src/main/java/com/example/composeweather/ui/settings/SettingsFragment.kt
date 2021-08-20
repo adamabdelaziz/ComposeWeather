@@ -23,6 +23,7 @@ import androidx.fragment.app.viewModels
 import com.example.composeweather.R
 import com.example.composeweather.preference.WeatherPreferences
 import com.example.composeweather.ui.common.Dimensions
+import com.example.composeweather.ui.common.LiveDataLoadingComponent
 import com.example.composeweather.ui.common.regularDimensions
 import com.example.composeweather.ui.common.smallDimensions
 import com.example.composeweather.ui.theme.ComposeWeatherTheme
@@ -88,17 +89,7 @@ class SettingsFragment : Fragment() {
 
     }
 
-    @Composable
-    fun LiveDataLoadingComponent() {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
 
-            CircularProgressIndicator(modifier = Modifier.wrapContentWidth(Alignment.CenterHorizontally))
-        }
-    }
 
 
     @Composable
