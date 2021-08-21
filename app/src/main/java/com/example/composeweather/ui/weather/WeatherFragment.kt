@@ -173,7 +173,6 @@ class WeatherFragment : Fragment() {
         //val weather = remember { weatherState }
         val addressList = geocoder.getFromLocation(weatherState.lat, weatherState.lon, 5)
         val title = getTitle(addressList)
-        viewModel.oneCall.value = weatherState
 
         SetStatusBar()
         Column(

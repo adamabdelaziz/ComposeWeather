@@ -14,15 +14,17 @@ class WeatherRepository @Inject constructor(
     private val localDataSource: WeatherDao,
 ) {
     suspend fun insertOneCall(oneCall: OneCall) {
-        Timber.d("insertOneCall() called")
+        Timber.d("insertOneCall() called RepositoryValue")
+        Timber.d("${oneCall.id} +  oneCall ID insertOneCall() RepositoryValue")
         localDataSource.insertOneCall(oneCall)
     }
 
 
     suspend fun getRemoteOneCall(lat: String, lon: String, unit: String): OneCall {
+        Timber.d("getRemoteOneCall() called RepositoryValue")
         val oneCall = remoteDataSource.getOneCallLatLon(lat, lon, unit)
-        Timber.d("getRemoteOneCall() called")
         if (oneCall != null) {
+            Timber.d("${oneCall.id} +  oneCall ID getRemoteOneCall() RepositoryValue")
             Timber.d("ONECALL NOT NULL")
             oneCall.unit = unit
             insertOneCall(oneCall)
@@ -34,15 +36,27 @@ class WeatherRepository @Inject constructor(
     }
 
     suspend fun getLocalOneCall(): OneCall {
-        Timber.d("getLocalOneCall() called")
-        return localDataSource.getCurrentOneCall()
+        Timber.d("getLocalOneCall() called RepositoryValue")
+        val oneCall = localDataSource.getCurrentOneCall()
+        if (oneCall == null) {
+            Timber.d("getLocalOneCall() oneCall is null and I got fucking trolled RepositoryValue")
+        } else {
+            Timber.d("${oneCall.id} +  oneCall ID getLocalOneCall() RepositoryValue")
+        }
+
+        return oneCall
+
+
     }
 
     suspend fun getCorrectOneCall(lat: String, lon: String, unit: String): OneCall {
+        Timber.d("getCorrectOneCall() called RepositoryValue")
         val localCall = getLocalOneCall()
+
         Timber.d(unit + " unit RepositoryValue")
 
         if (localCall != null) {
+            Timber.d("${localCall.id} +  oneCall ID getCorrectOneCall() RepositoryValue")
             val localUnit = localCall.unit
             Timber.d(localUnit + " localUnit RepositoryValue")
             if (unit != localUnit || localCall.lat.toString() == NYC_LAT || localCall.lat.toString() == NYC_LON) {
@@ -71,6 +85,7 @@ class WeatherRepository @Inject constructor(
             }
         } else {
             //LocalCall is null so you get from the internet
+            Timber.d("getCorrectOneCall() oneCall is null and calling getRemoteOneCall() RepositoryValue")
             return getRemoteOneCall(lat, lon, unit)
         }
 

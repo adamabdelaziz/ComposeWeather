@@ -18,7 +18,7 @@ data class OneCall(
     @SerializedName("timezone_offset")
     val offset: Double? = 0.0
 ) {
-    @PrimaryKey(autoGenerate = true)
-    var id: Long? = null
+    @PrimaryKey(autoGenerate = false)
+    var id: Int = 1
     var unit: String? = FAHRENHEIT
 }
