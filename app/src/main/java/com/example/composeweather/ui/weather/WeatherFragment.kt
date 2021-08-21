@@ -186,8 +186,9 @@ class WeatherFragment : Fragment() {
                 title = title,
                 dimensions = dimensions,
                 refreshLocation = { refreshLocation() },
-                goToSettings = { goToSettings() }
-            )
+                goToSettings = { goToSettings() },
+
+                )
 
             CurrentCard(weatherState, dimensions)
             HourlyCard(weatherState, dimensions)

@@ -1,6 +1,7 @@
 package com.example.composeweather.ui.weather
 
 import android.widget.Toast
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -16,7 +17,7 @@ fun TopRow(
     title: String,
     dimensions: Dimensions,
     refreshLocation: () -> Unit,
-    goToSettings: () -> Unit
+    goToSettings: () -> Unit,
 ) {
     val context = LocalContext.current
 
@@ -53,5 +54,6 @@ fun TopRow(
                 )
             }
         },
+
     )
 }

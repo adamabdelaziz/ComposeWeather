@@ -83,7 +83,7 @@ class SettingsFragment : Fragment() {
             //verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            TopRow()
+            SettingsTopRow(dimensions)
             SettingsList(preferences)
         }
 
@@ -105,19 +105,7 @@ class SettingsFragment : Fragment() {
         }
     }
 
-    @Composable
-    fun TopRow() {
-        TopAppBar(
-            title = {
-                Text(
-                    text = stringResource(R.string.settings_title),
-                    style = MaterialTheme.typography.h4,
-                    modifier = Modifier.padding(0.dp, 0.dp, 0.dp, dimensions.eight)
-                )
-            },
-            backgroundColor = MaterialTheme.colors.primary,
-        )
-    }
+
 
     @Composable
     fun SettingsList(preferences: WeatherPreferences) {
@@ -196,7 +184,7 @@ class SettingsFragment : Fragment() {
                 )
 
             }
-          
+
         }
     }
 }
