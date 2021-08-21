@@ -12,6 +12,7 @@ class Dimensions(
     val twentyfour: Dp,
     val sixtyfour: Dp,
     val bigImage: Dp,
+    val two: Dp,
 
     ) {
     override fun toString(): String {
@@ -28,6 +29,7 @@ val smallDimensions = Dimensions(
     sixtyfour = 32.dp,
     twentyfour = 24.dp,
     bigImage = 48.dp,
+    two = 1.dp,
 )
 
 val regularDimensions = Dimensions(
@@ -39,4 +41,5 @@ val regularDimensions = Dimensions(
     sixtyfour = 64.dp,
     twentyfour = 24.dp,
     bigImage = 96.dp,
+    two = 2.dp,
 )

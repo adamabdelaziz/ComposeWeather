@@ -17,7 +17,6 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.example.composeweather.R
@@ -54,19 +53,20 @@ class SettingsFragment : Fragment() {
 //            val prefFlow = settingsViewModel.preferencesFlow
             setContent {
                 val configuration = LocalConfiguration.current
-                dimensions = if (configuration.densityDpi >= 420) smallDimensions else regularDimensions
+                dimensions =
+                    if (configuration.densityDpi >= 420) smallDimensions else regularDimensions
                 val prefs by prefLiveData.observeAsState(initial = prefLiveData.value)
 //                val prefFlows by prefFlow.collectAsState(initial = prefFlow.first())
 
                 if (prefs != null) {
                     val lightTheme = prefs!!.lightTheme
                     Timber.d(prefs.toString() + " weatherPreferences not null")
-                    ComposeWeatherTheme(lightTheme,dimensions) {
+                    ComposeWeatherTheme(lightTheme, dimensions) {
                         SettingsScreen(prefs!!)
                     }
                 } else {
                     Timber.d(prefs.toString() + " weatherPreferences null")
-                    ComposeWeatherTheme(false,dimensions) {
+                    ComposeWeatherTheme(false, dimensions) {
                         LiveDataLoadingComponent()
                     }
                 }
@@ -90,8 +90,6 @@ class SettingsFragment : Fragment() {
     }
 
 
-
-
     @Composable
     fun SetStatusBar() {
         val systemUiController = rememberSystemUiController()
@@ -111,10 +109,12 @@ class SettingsFragment : Fragment() {
     fun TopRow() {
         TopAppBar(
             title = {
-                Text(text = stringResource(R.string.settings_title),
+                Text(
+                    text = stringResource(R.string.settings_title),
                     style = MaterialTheme.typography.h4,
-                    modifier = Modifier.padding(0.dp,0.dp,0.dp,8.dp)
-                ) },
+                    modifier = Modifier.padding(0.dp, 0.dp, 0.dp, dimensions.eight)
+                )
+            },
             backgroundColor = MaterialTheme.colors.primary,
         )
     }
@@ -129,7 +129,7 @@ class SettingsFragment : Fragment() {
             Timber.d(MaterialTheme.colors.toString() + " materialTheme")
             Timber.d(preferences.celsiusEnabled.toString())
             Spacer(
-                modifier = Modifier.height(16.dp)
+                modifier = Modifier.height(dimensions.sixteen)
             )
             Column(
                 modifier = Modifier.fillMaxSize(),
@@ -137,17 +137,18 @@ class SettingsFragment : Fragment() {
             {
 
                 Row(
-                    modifier = Modifier.fillMaxWidth().padding(8.dp),
+                    modifier = Modifier.fillMaxWidth().padding(dimensions.eight),
                     horizontalArrangement = Arrangement.Start,
                     verticalAlignment = Alignment.CenterVertically,
 
                     ) {
                     Text(
-                        text = "Use Celsius",
-                        fontSize = 24.sp
-                    )
+                        style = MaterialTheme.typography.h5,
+                        text = stringResource(R.string.useCelsiusString),
+
+                        )
                     Row(
-                        modifier = Modifier.fillMaxWidth().padding(8.dp),
+                        modifier = Modifier.fillMaxWidth().padding(dimensions.eight),
                         horizontalArrangement = Arrangement.End,
                         verticalAlignment = Alignment.CenterVertically,
 
@@ -158,22 +159,28 @@ class SettingsFragment : Fragment() {
                     }
                 }
                 Divider(
-                    modifier = Modifier.padding(0.dp, 8.dp, 8.dp, 2.dp),
+                    modifier = Modifier.padding(
+                        0.dp,
+                        dimensions.eight,
+                        dimensions.eight,
+                        dimensions.two
+                    ),
                     thickness = 2.dp,
                     color = MaterialTheme.colors.secondary
                 )
                 Row(
-                    modifier = Modifier.fillMaxWidth().padding(8.dp),
+                    modifier = Modifier.fillMaxWidth().padding(dimensions.eight),
                     horizontalArrangement = Arrangement.Start,
                     verticalAlignment = Alignment.CenterVertically,
 
                     ) {
                     Text(
-                        text = "Enable Light Theme",
-                        fontSize = 24.sp
-                    )
+                        style = MaterialTheme.typography.h5,
+                        text = stringResource(R.string.enableLightThemeString),
+
+                        )
                     Row(
-                        modifier = Modifier.fillMaxWidth().padding(8.dp),
+                        modifier = Modifier.fillMaxWidth().padding(dimensions.eight),
                         horizontalArrangement = Arrangement.End,
                         verticalAlignment = Alignment.CenterVertically,
 
@@ -185,15 +192,11 @@ class SettingsFragment : Fragment() {
                     }
                 }
                 Spacer(
-                    modifier = Modifier.height(16.dp)
+                    modifier = Modifier.height(dimensions.sixteen)
                 )
 
             }
-            Text(
-                modifier= Modifier.weight(1f),
-                fontSize = 24.sp,
-                text ="Test"
-            )
+          
         }
     }
 }

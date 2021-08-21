@@ -15,4 +15,6 @@
     <string name="day">Day</string>
     <string name="evening">Evening</string>
     <string name="night">Night</string>
+    <string name="enableLightThemeString">Enable Light Theme</string>
+    <string name="useCelsiusString">Use Celsius</string>
 </resources>

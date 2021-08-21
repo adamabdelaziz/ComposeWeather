@@ -88,7 +88,7 @@ fun CurrentCard(weatherState: OneCall, dimensions: Dimensions) {
                 // onCloseRequest.
                 openDialog = false
             },
-            text = { AlertWindow(alerts!!,dimensions) },
+            text = { AlertWindow(alerts!!, dimensions) },
 //                    text = { Column() {
 //                        for (alert in alerts) {
 //                            Text(
@@ -133,9 +133,9 @@ fun CurrentCard(weatherState: OneCall, dimensions: Dimensions) {
 
         ) {
         Text(
+            style = MaterialTheme.typography.h2,
             text = "$temp$DEGREE_SYMBOL",
             modifier = Modifier.align(Alignment.CenterHorizontally).padding(dimensions.eight),
-            fontSize = 64.sp,
 
             )
 //                if (temp != feelsLike) {

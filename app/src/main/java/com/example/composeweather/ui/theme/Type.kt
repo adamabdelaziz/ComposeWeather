@@ -15,6 +15,12 @@ val Typography = Typography(
         fontSize = 16.sp,
         color = Black
     ),
+    h2 = TextStyle(
+        fontFamily = FontFamily.Default,
+        fontWeight = FontWeight.Normal,
+        fontSize = 64.sp,
+        color = Black
+    ),
     button = TextStyle(
         fontFamily = FontFamily.Default,
         fontWeight = FontWeight.Normal,
@@ -71,6 +77,12 @@ val TypographyDark = Typography(
         letterSpacing = 0.1.sp,
         color = secondaryDark
     ),
+    h2 = TextStyle(
+        fontFamily = FontFamily.Default,
+        fontWeight = FontWeight.Normal,
+        fontSize = 64.sp,
+        color = White
+    ),
 
     )
 val smallTypography = Typography(
@@ -104,6 +116,12 @@ val smallTypography = Typography(
         letterSpacing = 0.05.sp,
         color= secondaryLight
     ),
+    h2 = TextStyle(
+        fontFamily = FontFamily.Default,
+        fontWeight = FontWeight.Normal,
+        fontSize = 40.sp,
+        color = Black
+    ),
 )
 
 val smallTypographyDark = Typography(
@@ -135,6 +153,12 @@ val smallTypographyDark = Typography(
         fontSize = 9.sp,
         letterSpacing = 0.05.sp,
         color = secondaryDark
+    ),
+    h2 = TextStyle(
+        fontFamily = FontFamily.Default,
+        fontWeight = FontWeight.Normal,
+        fontSize = 40.sp,
+        color = White
     ),
 
     )
