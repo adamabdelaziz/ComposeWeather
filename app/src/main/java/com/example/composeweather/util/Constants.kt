@@ -21,13 +21,13 @@ const val CELSIUS: String = "METRIC"
 
 const val HOUR_IN_MILLISECONDS : Long = 3600000
 
-//const val NYC_LAT = 40.7131.toString()
+const val NYC_LAT = 40.7131.toString()
+
+const val NYC_LON = (-74.0072).toString()
+
+//const val NYC_LAT = 42.3601.toString()
 //
-//const val NYC_LON = (-74.0072).toString()
-
-const val NYC_LAT = 42.3601.toString()
-
-const val NYC_LON = 71.0589.toString()
+//const val NYC_LON = 71.0589.toString()
 
 const val DEGREE_SYMBOL = "\u00B0"
 

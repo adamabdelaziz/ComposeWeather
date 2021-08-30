@@ -32,7 +32,7 @@ import androidx.navigation.fragment.findNavController
 import com.example.composeweather.R
 import com.example.composeweather.domain.model.OneCall
 import com.example.composeweather.ui.common.Dimensions
-import com.example.composeweather.ui.common.LiveDataLoadingComponent
+import com.example.composeweather.ui.common.LoadingComponent
 import com.example.composeweather.ui.common.regularDimensions
 import com.example.composeweather.ui.common.smallDimensions
 import com.example.composeweather.ui.theme.ComposeWeatherTheme
@@ -76,9 +76,11 @@ class WeatherFragment : Fragment() {
                     Timber.d("Permission denied")
                     Toast.makeText(
                         context,
-                        "The app will not work without location services",
+                        getString(R.string.locationError),
                         Toast.LENGTH_LONG
                     ).show()
+
+
                 }
             }
 
@@ -112,31 +114,56 @@ class WeatherFragment : Fragment() {
                 val location = viewModel.location.value
                 val prefs = viewModel.prefs.value
                 val oneCall = viewModel.oneCall.value
-
-                if (location) {
-                    if (loading || prefsLoading) {
-                        if (prefs != null && oneCall != null) {
-                            ComposeWeatherTheme(prefs.lightTheme, dimensions) {
-                                MainWeatherComponent(oneCall)
-                            }
-                        } else {
-                            LiveDataLoadingComponent()
-                        }
-                    } else if (!loading && !prefsLoading) {
-                        if (prefs != null && oneCall != null) {
-                            ComposeWeatherTheme(prefs.lightTheme, dimensions) {
-                                MainWeatherComponent(oneCall)
-                            }
+                //Timber.d("prefs is $prefs WeatherFragment onCreateVieww")
+                //Timber.d("location is $location WeatherFragment onCreateVieww")
+                if (loading || prefsLoading) {
+                    if (prefs != null && oneCall != null) {
+                        ComposeWeatherTheme(prefs.lightTheme, dimensions) {
+                            MainWeatherComponent(oneCall)
                         }
                     }
-                } else if (!location) {
-                    if (prefs != null) {
-                        viewModel.onTriggerEvent(OneCallEvent.RefreshWeather(NYC_LAT, NYC_LON))
-                    } else {
-                        LiveDataLoadingComponent()
+                    LoadingComponent()
+                } else {
+                    if (prefs != null && oneCall != null) {
+                        ComposeWeatherTheme(prefs.lightTheme, dimensions) {
+                            MainWeatherComponent(oneCall)
+                        }
                     }
 
                 }
+//                if (location) {
+//                    if (loading || prefsLoading) {
+//                        if (prefs != null && oneCall != null) {
+//                            ComposeWeatherTheme(prefs.lightTheme, dimensions) {
+//                                MainWeatherComponent(oneCall)
+//                            }
+//                        } else {
+//                            LiveDataLoadingComponent()
+//                        }
+//                    } else if (!loading && !prefsLoading) {
+//                        if (prefs != null && oneCall != null) {
+//                            ComposeWeatherTheme(prefs.lightTheme, dimensions) {
+//                                MainWeatherComponent(oneCall)
+//                            }
+//                        }
+//                    }
+//                }else{
+//                    if (loading || prefsLoading) {
+//                        if (prefs != null && oneCall != null) {
+//                            ComposeWeatherTheme(prefs.lightTheme, dimensions) {
+//                                MainWeatherComponent(oneCall)
+//                            }
+//                        } else {
+//                            LiveDataLoadingComponent()
+//                        }
+//                    } else if (!loading && !prefsLoading) {
+//                        if (prefs != null && oneCall != null) {
+//                            ComposeWeatherTheme(prefs.lightTheme, dimensions) {
+//                                MainWeatherComponent(oneCall)
+//                            }
+//                        }
+//                    }
+//                }
 
             }
 

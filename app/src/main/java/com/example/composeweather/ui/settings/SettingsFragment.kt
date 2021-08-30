@@ -22,7 +22,7 @@ import androidx.fragment.app.viewModels
 import com.example.composeweather.R
 import com.example.composeweather.preference.WeatherPreferences
 import com.example.composeweather.ui.common.Dimensions
-import com.example.composeweather.ui.common.LiveDataLoadingComponent
+import com.example.composeweather.ui.common.LoadingComponent
 import com.example.composeweather.ui.common.regularDimensions
 import com.example.composeweather.ui.common.smallDimensions
 import com.example.composeweather.ui.theme.ComposeWeatherTheme
@@ -67,7 +67,7 @@ class SettingsFragment : Fragment() {
                 } else {
                     Timber.d(prefs.toString() + " weatherPreferences null")
                     ComposeWeatherTheme(false, dimensions) {
-                        LiveDataLoadingComponent()
+                        LoadingComponent()
                     }
                 }
             }
@@ -104,7 +104,6 @@ class SettingsFragment : Fragment() {
             )
         }
     }
-
 
 
     @Composable

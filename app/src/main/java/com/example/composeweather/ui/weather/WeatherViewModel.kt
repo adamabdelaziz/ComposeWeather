@@ -56,7 +56,7 @@ class WeatherViewModel @Inject constructor(
     val prefs: MutableState<WeatherPreferences?> = mutableStateOf(null)
 
     val lightTheme = mutableStateOf(false)
-    //val celsiusEnabled = mutableStateOf(false)
+    val celsiusEnabled = mutableStateOf(false)
 
     val oneCall: MutableState<OneCall?> = mutableStateOf(null)
 
@@ -77,6 +77,9 @@ class WeatherViewModel @Inject constructor(
         }
         if (lat.value != NYC_LAT && lon.value != NYC_LON) {
             onTriggerEvent(RestoreStateEvent)
+        }
+        else{
+            onTriggerEvent(RefreshWeather(NYC_LAT, NYC_LON))
         }
         Timber.d("WeatherViewModel init end")
     }
@@ -101,6 +104,7 @@ class WeatherViewModel @Inject constructor(
                 is UpdateLocation -> {
                     val boolean = event.locationSetting
                     Timber.d("onTriggerEvent UpdateLocation")
+                    getPrefs()
                     updateDataStoreLocation(boolean)
                 }
             }
@@ -137,7 +141,7 @@ class WeatherViewModel @Inject constructor(
         //val celsiusEnabled = prefs.value!!.celsiusEnabled
 
         val weatherPreferences = preferencesFlow.first()
-        if (weatherPreferences.celsiusEnabled) {
+        if (celsiusEnabled.value) {
             oneCall.value = repository.getCorrectOneCall(lat.value, lon.value, CELSIUS)
             loading.value = false
         } else {
@@ -169,12 +173,14 @@ class WeatherViewModel @Inject constructor(
 
     private fun getPrefs() {
         viewModelScope.launch {
+            Timber.d("getPrefs() started")
             prefsLoading.value = true
             location.value = locationFlow.first()
             prefs.value = preferencesFlow.first()
-            lightTheme.value = preferencesFlow.first().lightTheme
-            //celsiusEnabled.value = preferencesFlow.first().celsiusEnabled
+            lightTheme.value = prefs.value!!.lightTheme
+            celsiusEnabled.value = prefs.value!!.celsiusEnabled
             prefsLoading.value = false
+            Timber.d("getPrefs() done")
         }
     }
 //    fun getWeather(lat: String, lon: String) {
