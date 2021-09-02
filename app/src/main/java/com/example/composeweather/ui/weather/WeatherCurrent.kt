@@ -89,20 +89,6 @@ fun CurrentCard(weatherState: OneCall, dimensions: Dimensions) {
                 openDialog = false
             },
             text = { AlertWindow(alerts!!, dimensions) },
-//                    text = { Column() {
-//                        for (alert in alerts) {
-//                            Text(
-//                                text = alert.event,
-//                                fontSize = 32.sp
-//                            )
-//
-//                            Text(
-//                                text = alert.description,
-//                                fontSize = 16.sp
-//                            )
-//                            Spacer(modifier = Modifier.size(8.dp))
-//                        }
-            //                   }},
             confirmButton = {
                 Button(
 
@@ -112,21 +98,9 @@ fun CurrentCard(weatherState: OneCall, dimensions: Dimensions) {
                     Text(stringResource(R.string.thanks_bro))
                 }
             })
-//                dismissButton = {
-//                    Button(
-//
-//                        onClick = {
-//                            openDialog = false
-//                        }) {
-//                        Text("D")
-//                    }
-//                })
+
     }
 
-//        Card(
-//            modifier = Modifier.fillMaxWidth().padding(16.dp),
-//            shape = RoundedCornerShape(20.dp),
-//        ) {
     Column(
         //Column modifiers go here
         modifier = Modifier.fillMaxWidth().padding(dimensions.sixteen),
@@ -138,13 +112,7 @@ fun CurrentCard(weatherState: OneCall, dimensions: Dimensions) {
             modifier = Modifier.align(Alignment.CenterHorizontally).padding(dimensions.eight),
 
             )
-//                if (temp != feelsLike) {
-//                    Text(
-//                        text = "Feels like $feelsLike$DEGREE_SYMBOL",
-//                        modifier = Modifier.align(CenterHorizontally).padding(8.dp),
-//                        fontSize = 32.sp
-//                    )
-//                }
+
         Row(
             //Row Modifiers go here
             modifier = Modifier.align(Alignment.CenterHorizontally),
@@ -263,21 +231,13 @@ fun CurrentCard(weatherState: OneCall, dimensions: Dimensions) {
                         .padding(dimensions.eight),
                 )
 
-//                        Image(
-//                            painter = rememberImagePainter(R.drawable.outline_warning_white_24),
-//                            contentDescription = stringResource(R.string.humidity_icon_description),
-//                            modifier = Modifier.clickable(onClick = {
-//                                openDialog = true
-//                            }).size(40.dp)
-//                        )
 
             }
 
             //End of Row
 
         }
-//                if (expanded) {
-//                    Hourly(hourly, offset)
+
 //                } //End of Column
     }
     //End of Card

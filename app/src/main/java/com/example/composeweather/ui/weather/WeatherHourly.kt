@@ -83,13 +83,6 @@ fun HourlyColumn(
             //modifier = Modifier.padding(8.dp),
 
         )
-//            if(oneHour > 0.0){
-//                Text(
-//                    text = "$oneHour",
-//                    modifier = Modifier.padding(8.dp),
-//                    fontSize = 16.sp
-//                )
-//            }
     }
 }
 
@@ -98,12 +91,7 @@ fun HourlyColumn(
 fun HourlyCard(weatherState: OneCall, dimensions: Dimensions) {
     val hourly = weatherState.hourly
     val offset = weatherState.offset
-//        Card(
-//            modifier = Modifier.fillMaxWidth()
-//                .padding(start = 16.dp, end = 16.dp, bottom = 8.dp, top = 8.dp)
-//                .animateContentSize(),
-//            shape = RoundedCornerShape(20.dp),
-//        ) {
+
     LazyRow(
         modifier = Modifier.fillMaxWidth()
             .padding(

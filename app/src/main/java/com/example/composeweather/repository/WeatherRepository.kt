@@ -91,14 +91,5 @@ class WeatherRepository @Inject constructor(
 
 
     }
-//
-//    fun getOneCallResponse(lat: String, lon: String, unit: String) = performGetOperation(
-//        databaseQuery = { localDataSource.getCurrentOneCallAsLiveData() },
-//        networkCall = { remoteDataSource.getOneCallLatLonResponse(lat, lon, unit) },
-//        saveCallResult = { localDataSource.insertOneCall(it) }
-//    )
-//
-//    fun getOneCallFlow(lat: String, lon: String, unit: String): Flow<OneCall> = flow {
-//        emit(remoteDataSource.getOneCallLatLon(lat, lon, unit))
-//    }.flowOn(Dispatchers.IO)
+
 }

@@ -114,8 +114,7 @@ class WeatherFragment : Fragment() {
                 val location = viewModel.location.value
                 val prefs = viewModel.prefs.value
                 val oneCall = viewModel.oneCall.value
-                //Timber.d("prefs is $prefs WeatherFragment onCreateVieww")
-                //Timber.d("location is $location WeatherFragment onCreateVieww")
+
                 if (loading || prefsLoading) {
                     if (prefs != null && oneCall != null) {
                         ComposeWeatherTheme(prefs.lightTheme, dimensions) {
@@ -131,39 +130,7 @@ class WeatherFragment : Fragment() {
                     }
 
                 }
-//                if (location) {
-//                    if (loading || prefsLoading) {
-//                        if (prefs != null && oneCall != null) {
-//                            ComposeWeatherTheme(prefs.lightTheme, dimensions) {
-//                                MainWeatherComponent(oneCall)
-//                            }
-//                        } else {
-//                            LiveDataLoadingComponent()
-//                        }
-//                    } else if (!loading && !prefsLoading) {
-//                        if (prefs != null && oneCall != null) {
-//                            ComposeWeatherTheme(prefs.lightTheme, dimensions) {
-//                                MainWeatherComponent(oneCall)
-//                            }
-//                        }
-//                    }
-//                }else{
-//                    if (loading || prefsLoading) {
-//                        if (prefs != null && oneCall != null) {
-//                            ComposeWeatherTheme(prefs.lightTheme, dimensions) {
-//                                MainWeatherComponent(oneCall)
-//                            }
-//                        } else {
-//                            LiveDataLoadingComponent()
-//                        }
-//                    } else if (!loading && !prefsLoading) {
-//                        if (prefs != null && oneCall != null) {
-//                            ComposeWeatherTheme(prefs.lightTheme, dimensions) {
-//                                MainWeatherComponent(oneCall)
-//                            }
-//                        }
-//                    }
-//                }
+
 
             }
 
@@ -185,14 +152,6 @@ class WeatherFragment : Fragment() {
         }
     }
 
-//    @Composable
-//    fun ProvideDimensions(
-//        dimensions: Dimensions,
-//        content: @Composable () -> Unit
-//    ) {
-//        val dimensionSet = remember { dimensions }
-//        CompositionLocalProvider(LocalAppDimens provides dimensionSet, content = content)
-//    }
 
     @Composable
     fun MainWeatherComponent(weatherState: OneCall) {

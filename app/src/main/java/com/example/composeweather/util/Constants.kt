@@ -46,14 +46,6 @@ const val SCATTERED_CLOUDS_NIGHT = "https://openweathermap.org/img/wn/03n@4x.png
 
 const val OVERCAST_CLOUDS_NIGHT = "https://openweathermap.org/img/wn/04n@4x.png"
 
-const val EXPAND_ANIMATION_DURATION = 300
-
-const val COLLAPSE_ANIMATION_DURATION = 300
-
-const val FADE_IN_ANIMATION_DURATION = 300
-
-const val FADE_OUT_ANIMATION_DURATION = 300
-
 const val SECONDS_IN_A_DAY = 86400
 
 //These two get weather icons from the API
@@ -104,9 +96,6 @@ fun getTimestampFromUnix(unixTime: Double, offset: Double): String {
 
     Timber.d(string + "kotlinNew")
 
-    //val newFormat = simpleDateFormat.format(java.time.Instant.ofEpochSecond(time.toLong()))
-    //Timber.d(newFormat + "kotlinNew")
-    //return string
     var timeStamp = simpleDateFormat.format(time * 1000L)
 
     return if(timeStamp.startsWith("0")){

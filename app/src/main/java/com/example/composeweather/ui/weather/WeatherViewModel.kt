@@ -32,21 +32,6 @@ class WeatherViewModel @Inject constructor(
     private val preferencesFlow = dataSoreManager.preferencesFlow
     private val locationFlow = dataSoreManager.locationFlow
 
-//    private val _oneCall = MutableLiveData<OneCall>()
-//    val oneCall: LiveData<OneCall> get() = _oneCall
-
-//    private val _prefs = MutableLiveData<WeatherPreferences>()
-//    val prefs: LiveData<WeatherPreferences> get() = _prefs
-
-//    private val _location = MutableLiveData<Boolean>()
-//    val location: LiveData<Boolean> get() = _location
-
-
-//    private val _oneCallStateFlow: MutableStateFlow<OneCallState> =
-//        MutableStateFlow(OneCallState.Empty)
-//    val oneCallStateFlow: StateFlow<OneCallState> = _oneCallStateFlow
-
-
     val loading = mutableStateOf(false)
     val prefsLoading = mutableStateOf(false)
     val lat = mutableStateOf(NYC_LAT)
@@ -128,19 +113,6 @@ class WeatherViewModel @Inject constructor(
 
     private suspend fun getWeather() {
         loading.value = true
-//        val cringeCall= OneCall(
-//            Current(
-//                0.0,
-//                0.0, 0.0, 0.0, 0.0,
-//                0.0, 0.0, 0.0, 0.0, 0.0,
-//                0.0, listOf(), 0.0, 0.0, 0.0, Rain(0.0, 0.0), Snow(0.0, 0.0)
-//            ), listOf(), listOf(), lat.value.toDouble(), lon.value.toDouble(), listOf(), listOf(), "", 0.0
-//        )
-//        oneCall.value =cringeCall
-//        repository.insertOneCall(cringeCall)
-        //val celsiusEnabled = prefs.value!!.celsiusEnabled
-
-        val weatherPreferences = preferencesFlow.first()
         if (celsiusEnabled.value) {
             oneCall.value = repository.getCorrectOneCall(lat.value, lon.value, CELSIUS)
             loading.value = false
@@ -148,7 +120,7 @@ class WeatherViewModel @Inject constructor(
             oneCall.value = repository.getCorrectOneCall(lat.value, lon.value, FAHRENHEIT)
             loading.value = false
         }
-        //loading.value =false
+
     }
 
     private suspend fun updateDataStoreLocation(locationSetting: Boolean) {
@@ -183,69 +155,7 @@ class WeatherViewModel @Inject constructor(
             Timber.d("getPrefs() done")
         }
     }
-//    fun getWeather(lat: String, lon: String) {
-//        viewModelScope.launch {
-//            val weatherPreferences = preferencesFlow.first()
-//
-//            if (weatherPreferences.celsiusEnabled) {
-//                val weather = repository.getOneCall(lat, lon, CELSIUS)
-//                _oneCall.value = weather
-//            } else {
-//                val weather = repository.getOneCall(lat, lon, FAHRENHEIT)
-//                _oneCall.value = weather
-//            }
-//
-//        }
-//    }
-//
-//    fun onLocationSettingsSelected(locationSetting: Boolean) {
-//        viewModelScope.launch {
-//            dataSoreManager.updateLocationEnabled(locationSetting)
-//            _location.value = locationSetting
-//        }
-//    }
-//
 
-
-    // private val _weatherLiveDataWrap = MutableLiveData<OneCallState>()
-
-//    val weatherLiveDataWrap: LiveData<OneCallState> get() = _weatherLiveDataWrap
-//
-//    fun getOneCallLiveDataWrap(lat: String, lon: String) {
-//        viewModelScope.launch {
-//            val weatherPreferences = preferencesFlow.first()
-//            if (_weatherLiveDataWrap.value == OneCallState.Empty) {
-//                _weatherLiveDataWrap.value = OneCallState.Loading
-//            }
-//            if(weatherPreferences.celsiusEnabled){
-//                val weather = repository.getOneCall(lat,lon, CELSIUS)
-//                _weatherLiveDataWrap.value = OneCallState.Success(weather)
-//            }else{
-//                val weather = repository.getOneCall(lat,lon, FAHRENHEIT)
-//                _weatherLiveDataWrap.value = OneCallState.Success(weather)
-//            }
-//
-//        }
-//    }
-//
-//    fun getOneCallFlow(lat: String, lon: String) {
-//        viewModelScope.launch {
-//            _oneCallStateFlow.value = OneCallState.Loading
-//            val weatherPreferences = preferencesFlow.first()
-//
-//            if (weatherPreferences.celsiusEnabled) {
-//                repository.getOneCallFlow(lat, lon, CELSIUS)
-//                    .catch { e -> _oneCallStateFlow.value = OneCallState.Failure(e) }
-//                    .collect { data -> _oneCallStateFlow.value = OneCallState.Success(data) }
-//
-//            } else {
-//                repository.getOneCallFlow(lat, lon, FAHRENHEIT)
-//                    .catch { e -> _oneCallStateFlow.value = OneCallState.Failure(e) }
-//                    .collect { data -> _oneCallStateFlow.value = OneCallState.Success(data) }
-//
-//            }
-//        }
-//    }
 }
 
 
