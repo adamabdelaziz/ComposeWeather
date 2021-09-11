@@ -31,3 +31,5 @@ hs_err_pid*
 .gradle/7.0.2/fileHashes/fileHashes.bin
 .gradle/7.0.2/executionHistory/executionHistory.lock
 .gradle/7.0.2/executionHistory/executionHistory.bin
+
+app/src/main/java/com/adamcodem/composeweather/util/Constants.kt
