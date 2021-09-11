@@ -33,3 +33,7 @@ hs_err_pid*
 .gradle/7.0.2/executionHistory/executionHistory.bin
 
 app/src/main/java/com/adamcodem/composeweather/util/Constants.kt
+app/release/app-release.aab
+app/debug/app-debug.aab
+app/debug/app-debug.aab
+app/release/app-release.aab
