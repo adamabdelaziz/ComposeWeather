@@ -4,7 +4,9 @@ package com.example.composeweather.ui.weather
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.hilt.Assisted
-import androidx.lifecycle.*
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.composeweather.domain.model.OneCall
 import com.example.composeweather.preference.DataStoreManager
 import com.example.composeweather.preference.WeatherPreferences
@@ -25,6 +27,7 @@ const val USER_LOCATION = "user_location"
 class WeatherViewModel @Inject constructor(
     private val repository: WeatherRepository,
     private val dataSoreManager: DataStoreManager,
+    private val LocationHelper: LocationHelper,
     @Assisted private val savedStateHandle: SavedStateHandle
 ) :
     ViewModel() {
@@ -37,7 +40,7 @@ class WeatherViewModel @Inject constructor(
     val lat = mutableStateOf(NYC_LAT)
     val lon = mutableStateOf(NYC_LON)
     val location = mutableStateOf(false)
-
+    val title = mutableStateOf("")
     val prefs: MutableState<WeatherPreferences?> = mutableStateOf(null)
 
     val lightTheme = mutableStateOf(false)
@@ -62,8 +65,7 @@ class WeatherViewModel @Inject constructor(
         }
         if (lat.value != NYC_LAT && lon.value != NYC_LON) {
             onTriggerEvent(RestoreStateEvent)
-        }
-        else{
+        } else {
             onTriggerEvent(RefreshWeather(NYC_LAT, NYC_LON))
         }
         Timber.d("WeatherViewModel init end")
@@ -80,6 +82,7 @@ class WeatherViewModel @Inject constructor(
                     Timber.d("onTriggerEvent RefreshWeather")
                     getPrefs()
                     getWeather()
+
                 }
                 is RestoreStateEvent -> {
                     Timber.d("onTriggerEvent RestoreStateEvent")
@@ -99,11 +102,10 @@ class WeatherViewModel @Inject constructor(
     private suspend fun restoreScreen() {
         loading.value = true
         val celsiusEnabled = preferencesFlow.first().celsiusEnabled
-        if (celsiusEnabled){
+        if (celsiusEnabled) {
             oneCall.value = repository.getCorrectOneCall(lat.value, lon.value, CELSIUS)
             loading.value = false
-        }else
-        {
+        } else {
             oneCall.value = repository.getCorrectOneCall(lat.value, lon.value, FAHRENHEIT)
             loading.value = false
         }
@@ -115,9 +117,11 @@ class WeatherViewModel @Inject constructor(
         loading.value = true
         if (celsiusEnabled.value) {
             oneCall.value = repository.getCorrectOneCall(lat.value, lon.value, CELSIUS)
+            getTitle()
             loading.value = false
         } else {
             oneCall.value = repository.getCorrectOneCall(lat.value, lon.value, FAHRENHEIT)
+            getTitle()
             loading.value = false
         }
 
@@ -143,6 +147,17 @@ class WeatherViewModel @Inject constructor(
         savedStateHandle.set(USER_LOCATION, locationSetting)
     }
 
+    fun refreshLocation() {
+        viewModelScope.launch {
+            val coord = LocationHelper.getLocation()
+
+            onTriggerEvent(RefreshWeather(coord.lat.toString(), coord.lon.toString()))
+        }
+
+    }
+    fun getTitle(){
+        title.value = LocationHelper.getTitle(oneCall.value!!.lat,oneCall.value!!.lon)
+    }
     private fun getPrefs() {
         viewModelScope.launch {
             Timber.d("getPrefs() started")

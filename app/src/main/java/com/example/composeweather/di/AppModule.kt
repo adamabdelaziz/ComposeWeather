@@ -1,7 +1,8 @@
 package com.example.composeweather.di
 
 import android.content.Context
-import android.provider.Telephony
+import android.location.Geocoder
+
 import com.example.composeweather.domain.dao.WeatherDao
 import com.example.composeweather.domain.db.AppDatabase
 import com.example.composeweather.network.RateInterceptor
@@ -10,6 +11,7 @@ import com.example.composeweather.network.WeatherService
 import com.example.composeweather.preference.DataStoreManager
 import com.example.composeweather.repository.WeatherRepository
 import com.example.composeweather.util.BASE_URL
+import com.example.composeweather.util.LocationHelper
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.gson.Gson
@@ -19,11 +21,11 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import okhttp3.Dispatcher
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Singleton
+
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -74,8 +76,22 @@ object AppModule {
 
 
     @Provides
+    @Singleton
     fun provideFusedLocationProvider(@ApplicationContext appContext: Context): FusedLocationProviderClient =
         LocationServices.getFusedLocationProviderClient(appContext)
+    @Provides
+    @Singleton
+    fun providesGeocoder(@ApplicationContext appContext: Context): Geocoder = Geocoder(appContext)
+
+    @Provides
+    @Singleton
+    fun providesLocationHelper(fusedLocationProviderClient: FusedLocationProviderClient, geocoder: Geocoder) : LocationHelper = LocationHelper(fusedLocationProviderClient,geocoder)
+//    @Provides
+//    @Singleton
+//    fun provideLocationManager(fusedLocationProviderClient: FusedLocationProviderClient): LocationManager1 {
+//        val locationManager = LocationManager1(fusedLocationProviderClient)
+//        return locationManager
+//    }
 
     @Singleton
     @Provides

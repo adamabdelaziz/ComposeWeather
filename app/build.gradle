@@ -135,6 +135,8 @@ dependencies {
     implementation "com.google.accompanist:accompanist-coil:$accompanist_version"
     //Permissions
     implementation "com.google.accompanist:accompanist-permissions:$accompanist_version"
+    //Tasks
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.4.1'
 }
 
 kapt {

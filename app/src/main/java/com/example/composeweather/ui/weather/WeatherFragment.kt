@@ -4,7 +4,6 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.location.Address
 import android.location.Geocoder
-import android.location.Location
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -36,8 +35,6 @@ import com.example.composeweather.ui.common.LoadingComponent
 import com.example.composeweather.ui.common.regularDimensions
 import com.example.composeweather.ui.common.smallDimensions
 import com.example.composeweather.ui.theme.ComposeWeatherTheme
-import com.example.composeweather.util.NYC_LAT
-import com.example.composeweather.util.NYC_LON
 import com.example.composeweather.util.OneCallEvent
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -52,9 +49,9 @@ class WeatherFragment : Fragment() {
 
     private val viewModel: WeatherViewModel by viewModels()
 
-    private lateinit var fusedLocationClient: FusedLocationProviderClient
+  //  private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var requestPermissionLauncher: ActivityResultLauncher<String>
-    private lateinit var geocoder: Geocoder
+    //private lateinit var geocoder: Geocoder
     private lateinit var dimensions: Dimensions
 
 
@@ -62,13 +59,13 @@ class WeatherFragment : Fragment() {
 
         Timber.d("onCreate called in WeatherFragment")
 
-        geocoder = Geocoder(context)
+       // geocoder = Geocoder(context)
 
         requestPermissionLauncher =
             registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
                 if (isGranted) {
                     viewModel.onTriggerEvent(OneCallEvent.UpdateLocation(true))
-                    refreshLocation()
+                     refreshLocation()
                     Timber.d("Permission granted")
                 } else {
                     //Probably
@@ -157,12 +154,14 @@ class WeatherFragment : Fragment() {
     fun MainWeatherComponent(weatherState: OneCall) {
 
         //val weather = remember { weatherState }
-        val addressList = geocoder.getFromLocation(weatherState.lat, weatherState.lon, 5)
-        val title = getTitle(addressList)
+        //val addressList = geocoder.getFromLocation(weatherState.lat, weatherState.lon, 5)
+        //val title = getTitle(addressList)
+        val title = viewModel.title.value
 
         SetStatusBar()
         Column(
             modifier = Modifier.fillMaxSize().background(MaterialTheme.colors.background),
+            //verticalArrangement = Arrangement.Center,
             //verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
 
@@ -205,9 +204,6 @@ class WeatherFragment : Fragment() {
     private fun refreshLocation() {
 
 
-        fusedLocationClient =
-            LocationServices.getFusedLocationProviderClient(this.requireActivity())
-
         if (ActivityCompat.checkSelfPermission(
                 this.requireContext(),
                 Manifest.permission.ACCESS_COARSE_LOCATION
@@ -217,27 +213,28 @@ class WeatherFragment : Fragment() {
             requestPermissionLauncher.launch(Manifest.permission.ACCESS_COARSE_LOCATION)
         } else {
             Timber.d("Have permission, refreshing location")
-            // locationer = true
+
             viewModel.onTriggerEvent(OneCallEvent.UpdateLocation(true))
-            fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
-                val lat: Double
-                val lon: Double
-
-                if (location == null) {
-                    lat = NYC_LAT.toDouble()
-                    lon = NYC_LON.toDouble()
-                } else {
-                    lat = location.latitude
-                    lon = location.longitude
-                }
-                viewModel.onTriggerEvent(
-                    OneCallEvent.RefreshWeather(
-                        lat.toString(),
-                        lon.toString()
-                    )
-                )
-
-            }
+            viewModel.refreshLocation()
+//            fusedLocationClient.lastLocation.addOnSuccessListener { location: Location? ->
+//                val lat: Double
+//                val lon: Double
+//
+//                if (location == null) {
+//                    lat = NYC_LAT.toDouble()
+//                    lon = NYC_LON.toDouble()
+//                } else {
+//                    lat = location.latitude
+//                    lon = location.longitude
+//                }
+//                viewModel.onTriggerEvent(
+//                    OneCallEvent.RefreshWeather(
+//                        lat.toString(),
+//                        lon.toString()
+//                    )
+//                )
+//
+//            }
         }
 
 
