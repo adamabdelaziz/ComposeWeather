@@ -37,3 +37,4 @@ app/release/app-release.aab
 app/debug/app-debug.aab
 app/debug/app-debug.aab
 app/release/app-release.aab
+app/src/main/java/com/adamcodem/composeweather/util/Constants.kt
